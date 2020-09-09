@@ -1,0 +1,73 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Wed Sep 09 19:26:25 2020
+[*]
+[dumpfile] "C:\Users\zuna\build_ground\ip_repo\sha256_1.0\hdl\wave.vcd"
+[dumpfile_mtime] "Wed Sep 09 19:26:03 2020"
+[dumpfile_size] 897
+[savefile] "C:\Users\zuna\build_ground\ip_repo\sha256_1.0\hdl\wave.gtkw"
+[timestart] 0
+[size] 2560 1361
+[pos] -330 -330
+*-14.000000 48600 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 239
+[signals_width] 200
+[sst_expanded] 1
+[sst_vpaned_height] 413
+@28
+tc_axi_sha256.aclk[0]
+tc_axi_sha256.aresetn[0]
+tc_axi_sha256.s_axi_aclk[0]
+[color] 3
+tc_axi_sha256.s_axi_aresetn[0]
+[color] 3
+tc_axi_sha256.s_axi_arvalid[0]
+@22
+[color] 3
+tc_axi_sha256.s_axi_araddr[3:0]
+@28
+[color] 3
+tc_axi_sha256.s_axi_arready[0]
+@22
+[color] 5
+tc_axi_sha256.s_axi_rdata[31:0]
+@28
+[color] 5
+tc_axi_sha256.s_axi_rready[0]
+[color] 5
+tc_axi_sha256.s_axi_rvalid[0]
+[color] 5
+tc_axi_sha256.s_axi_rresp[1:0]
+[color] 2
+tc_axi_sha256.s_axi_bready[0]
+[color] 2
+tc_axi_sha256.s_axi_bvalid[0]
+[color] 2
+tc_axi_sha256.s_axi_bresp[1:0]
+[color] 3
+tc_axi_sha256.s_axi_awvalid[0]
+[color] 3
+tc_axi_sha256.s_axi_awready[0]
+@c00022
+[color] 3
+tc_axi_sha256.s_axi_awaddr[3:0]
+@28
+(0)tc_axi_sha256.s_axi_awaddr[3:0]
+(1)tc_axi_sha256.s_axi_awaddr[3:0]
+(2)tc_axi_sha256.s_axi_awaddr[3:0]
+(3)tc_axi_sha256.s_axi_awaddr[3:0]
+@1401200
+-group_end
+@28
+[color] 7
+tc_axi_sha256.s_axi_wvalid[0]
+[color] 7
+tc_axi_sha256.s_axi_wready[0]
+@22
+[color] 7
+tc_axi_sha256.s_axi_wdata[31:0]
+@29
+[color] 7
+tc_axi_sha256.s_axi_wstrb[3:0]
+[pattern_trace] 1
+[pattern_trace] 0
