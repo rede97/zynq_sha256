@@ -1,6 +1,8 @@
 
 `timescale 1 ns / 1 ps
 
+// `include "sha256_v1_0_S00_AXI.v"
+
 	module sha256_v1_0 #
 	(
 		// Users to add parameters here

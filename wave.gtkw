@@ -1,17 +1,19 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Wed Sep 09 19:26:25 2020
+[*] Thu Sep 10 16:43:22 2020
 [*]
 [dumpfile] "C:\Users\zuna\build_ground\ip_repo\sha256_1.0\hdl\wave.vcd"
-[dumpfile_mtime] "Wed Sep 09 19:26:03 2020"
-[dumpfile_size] 897
+[dumpfile_mtime] "Thu Sep 10 16:42:59 2020"
+[dumpfile_size] 8782
 [savefile] "C:\Users\zuna\build_ground\ip_repo\sha256_1.0\hdl\wave.gtkw"
 [timestart] 0
 [size] 2560 1361
-[pos] -330 -330
-*-14.000000 48600 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -1 -1
+*-15.000000 73800 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tc_axi_sha256.
+[treeopen] tc_axi_sha256.sha256_v1_0_S00_AXI_inst.
 [sst_width] 239
-[signals_width] 200
+[signals_width] 270
 [sst_expanded] 1
 [sst_vpaned_height] 413
 @28
@@ -66,8 +68,28 @@ tc_axi_sha256.s_axi_wready[0]
 @22
 [color] 7
 tc_axi_sha256.s_axi_wdata[31:0]
-@29
+@28
 [color] 7
 tc_axi_sha256.s_axi_wstrb[3:0]
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.chunk_clr[0]
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.chunk_compress_update[0]
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.clk[0]
+@22
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.counter[7:0]
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.dat_lsb_i[31:0]
+@28
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.dat_vaild_i[0]
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.hash_vaild_o[0]
+@22
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.k_addr[5:0]
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.k_out[31:0]
+@28
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.rst_n[0]
+@22
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.state[3:0]
+@28
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.state_is_proc[0]
+@22
+tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.w_out[31:0]
 [pattern_trace] 1
 [pattern_trace] 0

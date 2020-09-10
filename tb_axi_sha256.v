@@ -1,12 +1,12 @@
 `timescale 1 ns / 1 ps
 
-`include "sha256_v1_0_S00_AXI.v"
+// `include "sha256_v1_0_S00_AXI.v"
 
-module tc_axi_sha256;
+module tb_axi_sha256;
 
 initial begin
     $dumpfile("wave.vcd");        //生成的vcd文件名称
-    $dumpvars(0, tc_axi_sha256);    //tb模块名称
+    $dumpvars(0, tb_axi_sha256);    //tb模块名称
     $timeformat(-9, 2, "ns", 4);
 end
 
@@ -81,6 +81,7 @@ endtask
 task axil_read;
     input [31:0] addr;
     begin
+        addr = addr & (~32'b11);
         $display("[%m]#%t INFO: Read Addr: 0x%08x", $time, addr);
         s_axi_araddr = addr;
         s_axi_arvalid = 1;
@@ -120,6 +121,7 @@ task axil_write;
     integer awready_ok;
     integer wready_ok;
     begin
+        addr = addr & (~32'b11);
         $display("[%m]#%t INFO: Write Data: 0x%08x to 0x%08x", $time, data, addr);
         awready_ok = 0;
         wready_ok = 0;
@@ -209,13 +211,11 @@ end
 initial begin
     @(posedge aresetn);
     axil_wait(3);
-    axil_write(32'h01, 32'hbad);
+    axil_write(32'h00, 32'h1);
 
-    // axil_wait(3);
-    axil_read(32'h01);
+    repeat(16) axil_write(32'h04, 32'hadadadad);
 
-
-    axil_wait(5);
+    axil_wait(128);
     $stop;
 end
 
