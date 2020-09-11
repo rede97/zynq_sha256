@@ -22,11 +22,11 @@ assign s_axi_aclk = aclk;
 assign s_axi_aresetn = aresetn;
 
 wire s_axi_arready;
-reg [3:0] s_axi_araddr;
+reg [5:0] s_axi_araddr;
 reg s_axi_arvalid;
 
 wire s_axi_awready;
-reg [3:0] s_axi_awaddr;
+reg [5:0] s_axi_awaddr;
 reg s_axi_awvalid;
 
 reg s_axi_bready;
@@ -46,7 +46,7 @@ reg s_axi_wvalid;
 
 sha256_v1_0_S00_AXI # (
                         .C_S_AXI_DATA_WIDTH(32),
-                        .C_S_AXI_ADDR_WIDTH(4)
+                        .C_S_AXI_ADDR_WIDTH(6)
                     ) sha256_v1_0_S00_AXI_inst (
                         .S_AXI_ACLK(s_axi_aclk),
                         .S_AXI_ARESETN(s_axi_aresetn),
@@ -215,7 +215,16 @@ initial begin
 
     repeat(16) axil_write(32'h04, 32'hadadadad);
 
-    axil_wait(128);
+    axil_wait(64+8);
+    axil_read(32'h20);
+    axil_read(32'h24);
+    axil_read(32'h28);
+    axil_read(32'h2c);
+    axil_read(32'h30);
+    axil_read(32'h34);
+    axil_read(32'h38);
+    axil_read(32'h3c);
+    axil_wait(8);
     $stop;
 end
 

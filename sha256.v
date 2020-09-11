@@ -88,6 +88,12 @@ sha256_k sha256_k_u1(
              .addr(k_addr),
              .k_o(k_out)
          );
+         
+//sha256_k sha256_k_u1 (
+//  .a(k_addr),              // input wire [5 : 0] a
+//  .qspo_ce(state_is_proc),  // input wire qspo_ce
+//  .spo(k_out)          // output wire [31 : 0] spo
+//);
 
 sha256_chunk_compress sha256_chunk_compress_u2(
                           .clk(clk),
@@ -137,7 +143,7 @@ always@(posedge clk or negedge rst_n) begin
                 end
             end
             FINISH: begin
-                state <= state;
+                state <= IDLE;
             end
         endcase
     end

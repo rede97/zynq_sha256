@@ -98,6 +98,7 @@ wire [31:0] hash7;
 wire [31:0] slv_reg0_nxt;
 wire hash_vaild_o;
 
+
 // AXI4LITE signals
 reg [C_S_AXI_ADDR_WIDTH-1 : 0] 	axi_awaddr;
 reg  	axi_awready;
@@ -116,7 +117,7 @@ reg  	axi_rvalid;
 // ADDR_LSB = 2 for 32 bits (n downto 2)
 // ADDR_LSB = 3 for 64 bits (n downto 3)
 localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32) + 1;
-localparam integer OPT_MEM_ADDR_BITS = 1;
+localparam integer OPT_MEM_ADDR_BITS = 3;
 //----------------------------------------------
 //-- Signals for user logic register space example
 //------------------------------------------------
@@ -410,7 +411,6 @@ assign dat_vaild_i = slv_reg_wren & dat_addr_vaild;
 assign dat_lsb_i = S_AXI_WDATA[31:0];
 
 assign slv_reg0_nxt = {16'h0, 7'h0, hash_vaild_o, 8'h0};
-
 
 sha256 sha256_inst(
            .clk(S_AXI_ACLK),
