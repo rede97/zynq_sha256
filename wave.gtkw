@@ -1,95 +1,50 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Thu Sep 10 16:43:22 2020
+[*] Mon Oct 12 17:19:19 2020
 [*]
-[dumpfile] "C:\Users\zuna\build_ground\ip_repo\sha256_1.0\hdl\wave.vcd"
-[dumpfile_mtime] "Thu Sep 10 16:42:59 2020"
-[dumpfile_size] 8782
-[savefile] "C:\Users\zuna\build_ground\ip_repo\sha256_1.0\hdl\wave.gtkw"
+[dumpfile] "C:\Users\zuna\build_ground\sha256-axi-lite\wave.vcd"
+[dumpfile_mtime] "Mon Oct 12 17:17:24 2020"
+[dumpfile_size] 15053
+[savefile] "C:\Users\zuna\build_ground\sha256-axi-lite\wave.gtkw"
 [timestart] 0
-[size] 2560 1361
-[pos] -1 -1
-*-15.000000 73800 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
-[treeopen] tc_axi_sha256.
-[treeopen] tc_axi_sha256.sha256_v1_0_S00_AXI_inst.
+[size] 2560 1244
+[pos] -1 116
+*-18.000000 938000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [sst_width] 239
-[signals_width] 270
+[signals_width] 320
 [sst_expanded] 1
-[sst_vpaned_height] 413
+[sst_vpaned_height] 372
 @28
-tc_axi_sha256.aclk[0]
-tc_axi_sha256.aresetn[0]
-tc_axi_sha256.s_axi_aclk[0]
-[color] 3
-tc_axi_sha256.s_axi_aresetn[0]
-[color] 3
-tc_axi_sha256.s_axi_arvalid[0]
+tb_axi_sha256.aclk[0]
+tb_axi_sha256.aresetn[0]
+tb_axi_sha256.s_axi_aclk[0]
 @22
-[color] 3
-tc_axi_sha256.s_axi_araddr[3:0]
+tb_axi_sha256.s_axi_araddr[5:0]
 @28
-[color] 3
-tc_axi_sha256.s_axi_arready[0]
+tb_axi_sha256.s_axi_aresetn[0]
+tb_axi_sha256.s_axi_arready[0]
+tb_axi_sha256.s_axi_arvalid[0]
 @22
-[color] 5
-tc_axi_sha256.s_axi_rdata[31:0]
+tb_axi_sha256.s_axi_awaddr[5:0]
 @28
-[color] 5
-tc_axi_sha256.s_axi_rready[0]
-[color] 5
-tc_axi_sha256.s_axi_rvalid[0]
-[color] 5
-tc_axi_sha256.s_axi_rresp[1:0]
+tb_axi_sha256.s_axi_awready[0]
+tb_axi_sha256.s_axi_awvalid[0]
+tb_axi_sha256.s_axi_bready[0]
+tb_axi_sha256.s_axi_bresp[1:0]
+tb_axi_sha256.s_axi_bvalid[0]
+tb_axi_sha256.s_axi_rready[0]
+tb_axi_sha256.s_axi_rresp[1:0]
+tb_axi_sha256.s_axi_rvalid[0]
+@22
+tb_axi_sha256.s_axi_wdata[31:0]
+@28
+tb_axi_sha256.s_axi_wready[0]
+@22
+tb_axi_sha256.s_axi_wstrb[3:0]
+@28
+tb_axi_sha256.s_axi_wvalid[0]
+@22
 [color] 2
-tc_axi_sha256.s_axi_bready[0]
-[color] 2
-tc_axi_sha256.s_axi_bvalid[0]
-[color] 2
-tc_axi_sha256.s_axi_bresp[1:0]
-[color] 3
-tc_axi_sha256.s_axi_awvalid[0]
-[color] 3
-tc_axi_sha256.s_axi_awready[0]
-@c00022
-[color] 3
-tc_axi_sha256.s_axi_awaddr[3:0]
-@28
-(0)tc_axi_sha256.s_axi_awaddr[3:0]
-(1)tc_axi_sha256.s_axi_awaddr[3:0]
-(2)tc_axi_sha256.s_axi_awaddr[3:0]
-(3)tc_axi_sha256.s_axi_awaddr[3:0]
-@1401200
--group_end
-@28
-[color] 7
-tc_axi_sha256.s_axi_wvalid[0]
-[color] 7
-tc_axi_sha256.s_axi_wready[0]
-@22
-[color] 7
-tc_axi_sha256.s_axi_wdata[31:0]
-@28
-[color] 7
-tc_axi_sha256.s_axi_wstrb[3:0]
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.chunk_clr[0]
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.chunk_compress_update[0]
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.clk[0]
-@22
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.counter[7:0]
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.dat_lsb_i[31:0]
-@28
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.dat_vaild_i[0]
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.hash_vaild_o[0]
-@22
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.k_addr[5:0]
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.k_out[31:0]
-@28
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.rst_n[0]
-@22
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.state[3:0]
-@28
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.state_is_proc[0]
-@22
-tc_axi_sha256.sha256_v1_0_S00_AXI_inst.sha256_inst.w_out[31:0]
+tb_axi_sha256.s_axi_rdata[31:0]
 [pattern_trace] 1
 [pattern_trace] 0

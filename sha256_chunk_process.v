@@ -77,9 +77,6 @@ assign w_out = W[0];
 always@(posedge clk or negedge rst_n) begin
     if(rst_n == 1'b0 | clear) begin
         W[15] <= 32'h0;
-        if(clear) begin
-            $display("[%m]#%t INFO: Clear", $time);
-        end
     end
     else begin
         if(enable) begin
