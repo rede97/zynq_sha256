@@ -44,7 +44,7 @@ reg [3:0] s_axi_wstrb;
 reg s_axi_wvalid;
 
 
-sha256_v1_0_S00_AXI # (
+sha256_axi_v1_0_S00_AXI # (
                         .C_S_AXI_DATA_WIDTH(32),
                         .C_S_AXI_ADDR_WIDTH(6)
                     ) sha256_v1_0_S00_AXI_inst (
