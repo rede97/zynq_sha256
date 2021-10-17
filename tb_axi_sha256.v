@@ -80,6 +80,7 @@ endtask
 
 task axil_read;
     input [31:0] addr;
+    output [31:0] value;
     begin
         addr = addr & (~32'b11);
         $display("[%m]#%t INFO: Read Addr: 0x%08x", $time, addr);
@@ -95,9 +96,11 @@ task axil_read;
                 s_axi_rready = 0;
                 if(s_axi_rvalid) begin
                     $display("[%m]#%t INFO: Read Value: 0x%08x @ 0x%08x -> [resp: %d]", $time, s_axi_rdata, addr, s_axi_rresp);
+                    value = s_axi_rdata;
                 end
                 else begin
                     $display("[%m]#%t ERROR: Read Invaild @ 0x%08x -> [resp: %d]", $time, addr, s_axi_rresp);
+                    value = 32'h00000000;
                 end
 
                 axil_wait(1);
@@ -208,23 +211,56 @@ initial begin
     aresetn = 1;
 end
 
+reg [31:0]sha256_result[7:0];
+task dump_sha256_result;
+    begin
+        $display("[%m]#%t SHA256: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", $time, 
+            sha256_result[0][7:0], sha256_result[0][15:8], sha256_result[0][23:16], sha256_result[0][31:24],
+            sha256_result[1][7:0], sha256_result[1][15:8], sha256_result[1][23:16], sha256_result[1][31:24],
+            sha256_result[2][7:0], sha256_result[2][15:8], sha256_result[2][23:16], sha256_result[2][31:24],
+            sha256_result[3][7:0], sha256_result[3][15:8], sha256_result[3][23:16], sha256_result[3][31:24],
+            sha256_result[4][7:0], sha256_result[4][15:8], sha256_result[4][23:16], sha256_result[4][31:24],
+            sha256_result[5][7:0], sha256_result[5][15:8], sha256_result[5][23:16], sha256_result[5][31:24],
+            sha256_result[6][7:0], sha256_result[6][15:8], sha256_result[6][23:16], sha256_result[6][31:24],
+            sha256_result[7][7:0], sha256_result[7][15:8], sha256_result[7][23:16], sha256_result[7][31:24]);
+    end
+endtask
+
 initial begin
     @(posedge aresetn);
     axil_wait(3);
     axil_write(32'h00, 32'h1);
 
-    repeat(16) axil_write(32'h04, 32'hadadadad);
+    // repeat(16) axil_write(32'h04, 32'hadadadad);
+    axil_write(32'h04, 32'h6c6c6568);
+    axil_write(32'h04, 32'h6f77206f);
+    axil_write(32'h04, 32'h80646c72);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h00000000);
+    axil_write(32'h04, 32'h58000000);
 
     axil_wait(64+8);
-    axil_read(32'h20);
-    axil_read(32'h24);
-    axil_read(32'h28);
-    axil_read(32'h2c);
-    axil_read(32'h30);
-    axil_read(32'h34);
-    axil_read(32'h38);
-    axil_read(32'h3c);
+    axil_read(32'h20, sha256_result[0]);
+    axil_read(32'h24, sha256_result[1]);
+    axil_read(32'h28, sha256_result[2]);
+    axil_read(32'h2c, sha256_result[3]);
+    axil_read(32'h30, sha256_result[4]);
+    axil_read(32'h34, sha256_result[5]);
+    axil_read(32'h38, sha256_result[6]);
+    axil_read(32'h3c, sha256_result[7]);
     axil_wait(8);
+
+    dump_sha256_result();
     $stop;
 end
 

@@ -26,14 +26,13 @@ module sha256_chunk_process(
            input clear,
            input proc_ninit,
            input dat_vaild_i,
-           input[31:0] dat_lsb_i,
+           input[31:0] dat_msb_i,
            output[31:0] w_out
        );
 
 reg[31:0] W[15:0];
 wire[31:0] w_in;
 wire[31:0] w_new;
-wire[31:0] dat_msb_i;
 wire enable;
 
 wire[31:0] w_m15;
@@ -68,7 +67,6 @@ assign s0 = w_m15_rr7 ^ w_m15_rr18 ^ w_m15_r3;
 assign s1 = w_m2_rr17 ^ w_m2_rr19 ^ w_m2_r10;
 assign w_new = w_m16 + s0 + w_m7 + s1;
 
-assign dat_msb_i = {dat_lsb_i[7:0], dat_lsb_i[15:8], dat_lsb_i[23:16], dat_lsb_i[31:24]};
 assign w_in = proc_ninit ? w_new : dat_msb_i;
 assign w_out = W[0];
 

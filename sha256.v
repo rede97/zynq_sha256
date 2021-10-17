@@ -47,6 +47,7 @@ localparam  IDLE = 0,
 
 reg[3:0] state;
 reg[7:0] counter;
+wire[31:0] dat_msb_i;
 wire[5:0] k_addr;
 wire chunk_clr;
 wire[31:0] k_out;
@@ -59,6 +60,7 @@ assign chunk_compress_update = counter == 8'h50;
 assign hash_vaild_o = state == IDLE;
 assign chunk_clr = (~dat_vaild_i & hash_vaild_o) | state == FINISH;
 assign state_is_proc = state == PROC;
+assign dat_msb_i = {dat_lsb_i[7:0], dat_lsb_i[15:8], dat_lsb_i[23:16], dat_lsb_i[31:24]};
 
 always@(posedge clk or negedge rst_n) begin
     if(rst_n == 1'b0 | chunk_clr) begin
@@ -79,7 +81,7 @@ sha256_chunk_process sha256_chunk_process_u0(
                          .clear(chunk_clr),
                          .proc_ninit(state_is_proc),
                          .dat_vaild_i(dat_vaild_i),
-                         .dat_lsb_i(dat_lsb_i),
+                         .dat_msb_i(dat_msb_i),
                          .w_out(w_out)
                      );
 

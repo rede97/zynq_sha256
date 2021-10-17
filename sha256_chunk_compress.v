@@ -90,14 +90,19 @@ assign maj = (a & b) ^ (a & c) ^ (b & c);
 assign tmp1 = h + s1 + ch + k_in + w_in;
 assign tmp2 = s0 + maj;
 
-assign hash0 = h8[0];
-assign hash1 = h8[1];
-assign hash2 = h8[2];
-assign hash3 = h8[3];
-assign hash4 = h8[4];
-assign hash5 = h8[5];
-assign hash6 = h8[6];
-assign hash7 = h8[7];
+function [31:0]lsb_to_msb;
+    input [31:0]lsb;
+    lsb_to_msb = {lsb[7:0], lsb[15:8], lsb[23:16], lsb[31:24]};
+endfunction
+
+assign hash0 = lsb_to_msb(h8[0]);
+assign hash1 = lsb_to_msb(h8[1]);
+assign hash2 = lsb_to_msb(h8[2]);
+assign hash3 = lsb_to_msb(h8[3]);
+assign hash4 = lsb_to_msb(h8[4]);
+assign hash5 = lsb_to_msb(h8[5]);
+assign hash6 = lsb_to_msb(h8[6]);
+assign hash7 = lsb_to_msb(h8[7]);
 
 always@(posedge clk or negedge rst_n) begin
     if(rst_n == 1'b0) begin
