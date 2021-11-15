@@ -1,10 +1,10 @@
 `timescale 1ns / 1ps
 
 module sha256_k(
-    input enable,
-    input[5:0] addr,
-    output[31:0] k_o
-);
+           input enable,
+           input[5:0] addr,
+           output[31:0] k_o
+       );
 
 reg[31:0] rom_k[63:0];
 
