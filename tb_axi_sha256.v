@@ -22,7 +22,7 @@ assign s_axi_aclk = aclk;
 assign s_axi_aresetn = aresetn;
 
 wire s_axi_arready;
-reg [5:0] s_axi_araddr;
+reg [7:0] s_axi_araddr;
 reg s_axi_arvalid;
 
 wire s_axi_awready;
@@ -46,7 +46,7 @@ reg s_axi_wvalid;
 
 sha256_axi_v1_0_S00_AXI # (
                         .C_S_AXI_DATA_WIDTH(32),
-                        .C_S_AXI_ADDR_WIDTH(6)
+                        .C_S_AXI_ADDR_WIDTH(8)
                     ) sha256_v1_0_S00_AXI_inst (
                         .S_AXI_ACLK(s_axi_aclk),
                         .S_AXI_ARESETN(s_axi_aresetn),
