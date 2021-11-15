@@ -11,7 +11,7 @@
 		// Width of S_AXI data bus
 		parameter integer C_S_AXI_DATA_WIDTH	= 32,
 		// Width of S_AXI address bus
-		parameter integer C_S_AXI_ADDR_WIDTH	= 4
+		parameter integer C_S_AXI_ADDR_WIDTH	= 8
 	)
 	(
            // Users to add ports here
@@ -401,6 +401,9 @@
     end
     
     // Add user logic here
+
+    wire [OPT_MEM_ADDR_BITS:0] inner_addr;
+    assign inner_addr = axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS+1:ADDR_LSB];
     
     assign clk = S_AXI_ACLK;
     assign rst_n = S_AXI_ARESETN & (~slv_reg0[0]);
