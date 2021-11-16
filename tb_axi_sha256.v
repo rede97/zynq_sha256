@@ -26,7 +26,7 @@ reg [7:0] s_axi_araddr;
 reg s_axi_arvalid;
 
 wire s_axi_awready;
-reg [5:0] s_axi_awaddr;
+reg [7:0] s_axi_awaddr;
 reg s_axi_awvalid;
 
 reg s_axi_bready;
@@ -79,12 +79,13 @@ task axil_wait;
 endtask
 
 task axil_read;
-    input [31:0] addr;
+    input [29:0] addr;
     output [31:0] value;
+    reg [31:0] temp_addr;
     begin
-        addr = addr & (~32'b11);
-        $display("[%m]#%t INFO: Read Addr: 0x%08x", $time, addr);
-        s_axi_araddr = addr;
+        s_axi_araddr = {addr, 2'b00};
+        temp_addr = s_axi_araddr;
+        $display("[%m]#%t INFO: Read Addr: 0x%08x", $time, temp_addr);
         s_axi_arvalid = 1;
         s_axi_rready = 1;
         repeat(4) begin
@@ -95,11 +96,11 @@ task axil_read;
                 axil_wait(1);
                 s_axi_rready = 0;
                 if(s_axi_rvalid) begin
-                    $display("[%m]#%t INFO: Read Value: 0x%08x @ 0x%08x -> [resp: %d]", $time, s_axi_rdata, addr, s_axi_rresp);
+                    $display("[%m]#%t INFO: Read Value: 0x%08x @ 0x%08x -> [resp: %d]", $time, s_axi_rdata, temp_addr, s_axi_rresp);
                     value = s_axi_rdata;
                 end
                 else begin
-                    $display("[%m]#%t ERROR: Read Invaild @ 0x%08x -> [resp: %d]", $time, addr, s_axi_rresp);
+                    $display("[%m]#%t ERROR: Read Invaild @ 0x%08x -> [resp: %d]", $time, temp_addr, s_axi_rresp);
                     value = 32'h00000000;
                 end
 
@@ -108,7 +109,7 @@ task axil_read;
             end
         end
 
-        $display("[%m]#%t ERROR: Timeout, ARREADY must be 1 @ 0x%08x", $time, addr);
+        $display("[%m]#%t ERROR: Timeout, ARREADY must be 1 @ 0x%08x", $time, temp_addr);
 
         s_axi_araddr = 0;
         s_axi_arvalid = 0;
@@ -119,18 +120,19 @@ task axil_read;
 endtask
 
 task axil_write;
-    input [31:0] addr;
+    input [29:0] addr;
     input [31:0] data;
     integer awready_ok;
     integer wready_ok;
+    reg [31:0] temp_addr;
     begin
-        addr = addr & (~32'b11);
-        $display("[%m]#%t INFO: Write Data: 0x%08x to 0x%08x", $time, data, addr);
         awready_ok = 0;
         wready_ok = 0;
 
         s_axi_awvalid = 1;
-        s_axi_awaddr = addr;
+        s_axi_awaddr = {addr, 2'b00};
+        temp_addr = s_axi_awaddr;
+        $display("[%m]#%t INFO: Write Data: 0x%08x to 0x%08x", $time, data, temp_addr);
 
         s_axi_wvalid = 1;
         s_axi_wdata = data;
@@ -154,10 +156,10 @@ task axil_write;
                 axil_wait(1);
                 s_axi_bready = 0;
                 if(s_axi_bvalid) begin
-                    $display("[%m]#%t INFO: Write Data: 0x%08x => 0x%08x -> [resp: %d]", $time, data, addr, s_axi_bresp);
+                    $display("[%m]#%t INFO: Write Data: 0x%08x => 0x%08x -> [resp: %d]", $time, data, temp_addr, s_axi_bresp);
                 end
                 else begin
-                    $display("[%m]#%t Error: Write Invaild: 0x%08x to 0x%08x -> [resp: %d]", $time, addr, data, s_axi_bresp);
+                    $display("[%m]#%t Error: Write Invaild: 0x%08x to 0x%08x -> [resp: %d]", $time, temp_addr, data, s_axi_bresp);
                 end
 
                 axil_wait(1);
@@ -166,10 +168,10 @@ task axil_write;
         end
 
         if(awready_ok) begin
-            $display("[%m]#%t ERROR: Timeout, AWREADY must be 1 @ 0x%08x", $time, addr);
+            $display("[%m]#%t ERROR: Timeout, AWREADY must be 1 @ 0x%08x", $time, temp_addr);
         end
         if(wready_ok) begin
-            $display("[%m]#%t ERROR: Timeout, WREADY must be 1 @ 0x%08x", $time, addr);
+            $display("[%m]#%t ERROR: Timeout, WREADY must be 1 @ 0x%08x", $time, temp_addr);
         end
 
         s_axi_awvalid = 0;
@@ -232,35 +234,36 @@ initial begin
     axil_write(32'h00, 32'h1);
 
     // repeat(16) axil_write(32'h04, 32'hadadadad);
-    axil_write(32'h04, 32'h6c6c6568);
-    axil_write(32'h04, 32'h6f77206f);
-    axil_write(32'h04, 32'h80646c72);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h00000000);
-    axil_write(32'h04, 32'h58000000);
+    axil_write(32'h10, 32'h6c6c6568);
+    axil_write(32'h11, 32'h6f77206f);
+    axil_write(32'h12, 32'h80646c72);
+    axil_write(32'h13, 32'h00000000);
+    axil_write(32'h14, 32'h00000000);
+    axil_write(32'h15, 32'h00000000);
+    axil_write(32'h16, 32'h00000000);
+    axil_write(32'h17, 32'h00000000);
+    axil_write(32'h18, 32'h00000000);
+    axil_write(32'h19, 32'h00000000);
+    axil_write(32'h1a, 32'h00000000);
+    axil_write(32'h1b, 32'h00000000);
+    axil_write(32'h1c, 32'h00000000);
+    axil_write(32'h1d, 32'h00000000);
+    axil_write(32'h1e, 32'h00000000);
+    axil_write(32'h1f, 32'h58000000);
 
     axil_wait(64+8);
-    axil_read(32'h20, sha256_result[0]);
-    axil_read(32'h24, sha256_result[1]);
-    axil_read(32'h28, sha256_result[2]);
-    axil_read(32'h2c, sha256_result[3]);
-    axil_read(32'h30, sha256_result[4]);
-    axil_read(32'h34, sha256_result[5]);
-    axil_read(32'h38, sha256_result[6]);
-    axil_read(32'h3c, sha256_result[7]);
+    axil_read(32'h08, sha256_result[0]);
+    axil_read(32'h09, sha256_result[1]);
+    axil_read(32'h0a, sha256_result[2]);
+    axil_read(32'h0b, sha256_result[3]);
+    axil_read(32'h0c, sha256_result[4]);
+    axil_read(32'h0d, sha256_result[5]);
+    axil_read(32'h0e, sha256_result[6]);
+    axil_read(32'h0f, sha256_result[7]);
     axil_wait(8);
 
     dump_sha256_result();
+    $display("expect: b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
     $stop;
 end
 
