@@ -16,6 +16,7 @@ module sha256_axi_v1_0_S00_AXI #
        (
            // Users to add ports here
 
+           output wire interrupt_busy,
            // User ports ends
            // Do not modify the ports beyond this line
 
@@ -94,7 +95,7 @@ wire [31:0] hash5;
 wire [31:0] hash6;
 wire [31:0] hash7;
 wire [31:0] slv_reg0_nxt;
-wire hash_vaild_o;
+wire hash_busy_o;
 
 
 // AXI4LITE signals
@@ -407,8 +408,9 @@ assign rst_n = S_AXI_ARESETN & (~slv_reg0[0]);
 assign dat_addr_vaild = axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB+4] == 2'h1;
 assign dat_vaild_i = slv_reg_wren & dat_addr_vaild;
 assign dat_lsb_i = S_AXI_WDATA[31:0];
+assign interrupt_busy = slv_reg0[1] & hash_busy_o;
 
-assign slv_reg0_nxt = {16'h0, 7'h0, hash_vaild_o, 8'h0};
+assign slv_reg0_nxt = {16'h0, 7'h0, hash_busy_o, 6'h0, slv_reg0[1], 1'b0};
 
 sha256 sha256_inst(
            .clk(S_AXI_ACLK),
@@ -423,7 +425,7 @@ sha256 sha256_inst(
            .hash5(hash5),
            .hash6(hash6),
            .hash7(hash7),
-           .hash_vaild_o(hash_vaild_o)
+           .hash_busy_o(hash_busy_o)
        );
 
 // User logic ends

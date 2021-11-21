@@ -4,7 +4,8 @@
 
 module tb_axi_sha256;
 
-initial begin
+initial
+begin
     $dumpfile("wave.vcd");        //生成的vcd文件名称
     $dumpvars(0, tb_axi_sha256);    //tb模块名称
     $timeformat(-9, 2, "ns", 4);
@@ -43,6 +44,8 @@ reg [31:0] s_axi_wdata;
 reg [3:0] s_axi_wstrb;
 reg s_axi_wvalid;
 
+wire interrupt_busy;
+
 
 sha256_axi_v1_0_S00_AXI # (
                             .C_S_AXI_DATA_WIDTH(32),
@@ -68,7 +71,8 @@ sha256_axi_v1_0_S00_AXI # (
                             .S_AXI_RDATA(s_axi_rdata),
                             .S_AXI_RRESP(s_axi_rresp),
                             .S_AXI_RVALID(s_axi_rvalid),
-                            .S_AXI_RREADY(s_axi_rready)
+                            .S_AXI_RREADY(s_axi_rready),
+                            .interrupt_busy(interrupt_busy)
                         );
 
 task axil_wait;
@@ -88,18 +92,22 @@ task axil_read;
         $display("[%m]#%t INFO: Read Addr: 0x%08x", $time, temp_addr);
         s_axi_arvalid = 1;
         s_axi_rready = 1;
-        repeat(4) begin
+        repeat(4)
+        begin
             axil_wait(1);
-            if(s_axi_arready) begin
+            if(s_axi_arready)
+            begin
                 s_axi_araddr = 0;
                 s_axi_arvalid = 0;
                 axil_wait(1);
                 s_axi_rready = 0;
-                if(s_axi_rvalid) begin
+                if(s_axi_rvalid)
+                begin
                     $display("[%m]#%t INFO: Read Value: 0x%08x @ 0x%08x -> [resp: %d]", $time, s_axi_rdata, temp_addr, s_axi_rresp);
                     value = s_axi_rdata;
                 end
-                else begin
+                else
+                begin
                     $display("[%m]#%t ERROR: Read Invaild @ 0x%08x -> [resp: %d]", $time, temp_addr, s_axi_rresp);
                     value = 32'h00000000;
                 end
@@ -139,26 +147,32 @@ task axil_write;
         s_axi_wstrb = 4'b1111;
 
         s_axi_bready = 1;
-        repeat(4) begin
+        repeat(4)
+        begin
             axil_wait(1);
-            if(s_axi_awready) begin
+            if(s_axi_awready)
+            begin
                 awready_ok = 1;
                 s_axi_awvalid = 0;
                 s_axi_awaddr = 0;
             end
-            if(s_axi_wready) begin
+            if(s_axi_wready)
+            begin
                 wready_ok = 1;
                 s_axi_wvalid = 0;
                 s_axi_wdata = 0;
                 s_axi_wstrb = 0;
             end
-            if(wready_ok & awready_ok) begin
+            if(wready_ok & awready_ok)
+            begin
                 axil_wait(1);
                 s_axi_bready = 0;
-                if(s_axi_bvalid) begin
+                if(s_axi_bvalid)
+                begin
                     $display("[%m]#%t INFO: Write Data: 0x%08x => 0x%08x -> [resp: %d]", $time, data, temp_addr, s_axi_bresp);
                 end
-                else begin
+                else
+                begin
                     $display("[%m]#%t Error: Write Invaild: 0x%08x to 0x%08x -> [resp: %d]", $time, temp_addr, data, s_axi_bresp);
                 end
 
@@ -167,10 +181,12 @@ task axil_write;
             end
         end
 
-        if(awready_ok) begin
+        if(awready_ok)
+        begin
             $display("[%m]#%t ERROR: Timeout, AWREADY must be 1 @ 0x%08x", $time, temp_addr);
         end
-        if(wready_ok) begin
+        if(wready_ok)
+        begin
             $display("[%m]#%t ERROR: Timeout, WREADY must be 1 @ 0x%08x", $time, temp_addr);
         end
 
@@ -187,13 +203,15 @@ task axil_write;
     end
 endtask
 
-initial begin
+initial
+begin
     #0 aclk = 0;
     forever
         #(T/2) aclk = ~aclk;
 end
 
-initial begin
+initial
+begin
     s_axi_araddr = 0;
     s_axi_arvalid = 0;
 
@@ -228,10 +246,12 @@ task dump_sha256_result;
     end
 endtask
 
-initial begin
+reg[31:0] temp;
+initial
+begin
     @(posedge aresetn);
     axil_wait(3);
-    axil_write(32'h00, 32'h1);
+    axil_write(32'h00, 32'b11);
 
     // repeat(16) axil_write(32'h04, 32'hadadadad);
     axil_write(32'h10, 32'h6c6c6568);
@@ -251,7 +271,11 @@ initial begin
     axil_write(32'h1e, 32'h00000000);
     axil_write(32'h1f, 32'h58000000);
 
-    axil_wait(64+8);
+    axil_read(32'h00, temp);
+    $display("[%m]#%t status: 0x%08x", $time, temp);
+
+    @(negedge interrupt_busy);
+    axil_wait(4);
     axil_read(32'h08, sha256_result[0]);
     axil_read(32'h09, sha256_result[1]);
     axil_read(32'h0a, sha256_result[2]);
@@ -264,7 +288,7 @@ initial begin
 
     dump_sha256_result();
     $display("expect: b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
-    $stop;
+    $finish;
 end
 
 endmodule

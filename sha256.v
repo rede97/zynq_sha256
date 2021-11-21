@@ -37,7 +37,7 @@ module sha256(
            output [31:0] hash5,
            output [31:0] hash6,
            output [31:0] hash7,
-           output hash_vaild_o
+           output wire hash_busy_o
        );
 
 localparam  IDLE = 0,
@@ -57,19 +57,25 @@ wire chunk_compress_update;
 
 assign k_addr = counter[5:0] - 6'h10;
 assign chunk_compress_update = counter == 8'h50;
-assign hash_vaild_o = state == IDLE;
-assign chunk_clr = (~dat_vaild_i & hash_vaild_o) | state == FINISH;
+assign hash_busy_o = state == PROC | state == FINISH;
+assign chunk_clr = (~dat_vaild_i & (state == IDLE)) | state == FINISH;
 assign state_is_proc = state == PROC;
 assign dat_msb_i = {dat_lsb_i[7:0], dat_lsb_i[15:8], dat_lsb_i[23:16], dat_lsb_i[31:24]};
 
-always@(posedge clk or negedge rst_n) begin
-    if(rst_n == 1'b0 | chunk_clr) begin
+always@(posedge clk or negedge rst_n)
+begin
+    if(rst_n == 1'b0 | chunk_clr)
+    begin
         counter <= 8'h0;
     end
-    else begin
-        if(dat_vaild_i | state_is_proc) begin
+    else
+    begin
+        if(dat_vaild_i | state_is_proc)
+        begin
             counter <= counter + 8'h1;
-        end else begin
+        end
+        else
+        begin
             counter <= counter;
         end
     end
@@ -114,37 +120,50 @@ sha256_chunk_compress sha256_chunk_compress_u2(
                           .hash7(hash7)
                       );
 
-always@(posedge clk or negedge rst_n) begin
-    if(rst_n == 1'b0) begin
+always@(posedge clk or negedge rst_n)
+begin
+    if(rst_n == 1'b0)
+    begin
         state <= IDLE;
     end
-    else begin
+    else
+    begin
         case(state)
-            IDLE: begin
-                if(dat_vaild_i) begin
+            IDLE:
+            begin
+                if(dat_vaild_i)
+                begin
                     state <= LOAD;
                 end
-                else begin
+                else
+                begin
                     state <= state;
                 end
             end
-            LOAD: begin
-                if(counter == 8'h10) begin
+            LOAD:
+            begin
+                if(counter == 8'h10)
+                begin
                     state <= PROC;
                 end
-                else begin
+                else
+                begin
                     state <= state;
                 end
             end
-            PROC: begin
-                if(chunk_compress_update) begin
+            PROC:
+            begin
+                if(chunk_compress_update)
+                begin
                     state <= FINISH;
                 end
-                else begin
+                else
+                begin
                     state <= state;
                 end
             end
-            FINISH: begin
+            FINISH:
+            begin
                 state <= IDLE;
             end
         endcase

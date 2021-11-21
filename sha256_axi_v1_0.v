@@ -15,6 +15,7 @@ module sha256_axi_v1_0 #
        )
        (
            // Users to add ports here
+           output wire interrupt_busy,
 
            // User ports ends
            // Do not modify the ports beyond this line
@@ -68,7 +69,8 @@ sha256_axi_v1_0_S00_AXI # (
                             .S_AXI_RDATA(s00_axi_rdata),
                             .S_AXI_RRESP(s00_axi_rresp),
                             .S_AXI_RVALID(s00_axi_rvalid),
-                            .S_AXI_RREADY(s00_axi_rready)
+                            .S_AXI_RREADY(s00_axi_rready),
+                            .interrupt_busy(interrupt_busy)
                         );
 
 // Add user logic here
