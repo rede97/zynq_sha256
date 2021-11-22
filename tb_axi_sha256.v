@@ -44,7 +44,7 @@ reg [31:0] s_axi_wdata;
 reg [3:0] s_axi_wstrb;
 reg s_axi_wvalid;
 
-wire interrupt_busy;
+wire irq_hash_finish;
 
 
 sha256_axi_v1_0_S00_AXI # (
@@ -72,7 +72,7 @@ sha256_axi_v1_0_S00_AXI # (
                             .S_AXI_RRESP(s_axi_rresp),
                             .S_AXI_RVALID(s_axi_rvalid),
                             .S_AXI_RREADY(s_axi_rready),
-                            .interrupt_busy(interrupt_busy)
+                            .irq_hash_finish(irq_hash_finish)
                         );
 
 task axil_wait;
@@ -274,7 +274,7 @@ begin
     axil_read(32'h00, temp);
     $display("[%m]#%t status: 0x%08x", $time, temp);
 
-    @(negedge interrupt_busy);
+    @(posedge irq_hash_finish);
     axil_wait(4);
     axil_read(32'h08, sha256_result[0]);
     axil_read(32'h09, sha256_result[1]);

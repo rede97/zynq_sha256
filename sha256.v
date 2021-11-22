@@ -37,7 +37,8 @@ module sha256(
            output [31:0] hash5,
            output [31:0] hash6,
            output [31:0] hash7,
-           output wire hash_busy_o
+           output wire hash_busy_o,
+           output reg irq_finish
        );
 
 localparam  IDLE = 0,
@@ -45,7 +46,8 @@ localparam  IDLE = 0,
             PROC = 2,
             FINISH = 3;
 
-reg[3:0] state;
+reg[1:0] state;
+reg[1:0] state_next;
 reg[7:0] counter;
 wire[31:0] dat_msb_i;
 wire[5:0] k_addr;
@@ -122,51 +124,75 @@ sha256_chunk_compress sha256_chunk_compress_u2(
 
 always@(posedge clk or negedge rst_n)
 begin
-    if(rst_n == 1'b0)
+    if (rst_n == 1'b0)
     begin
         state <= IDLE;
     end
     else
     begin
+        state <= state_next;
+    end
+end
+
+always@(*)
+begin
+    if(rst_n == 1'b0)
+    begin
+        state_next = IDLE;
+    end
+    else
+    begin
         case(state)
+            default: begin
+                state_next = IDLE;
+            end
             IDLE:
             begin
                 if(dat_vaild_i)
                 begin
-                    state <= LOAD;
+                    state_next = LOAD;
                 end
                 else
                 begin
-                    state <= state;
+                    state_next = state;
                 end
             end
             LOAD:
             begin
                 if(counter == 8'h10)
                 begin
-                    state <= PROC;
+                    state_next = PROC;
                 end
                 else
                 begin
-                    state <= state;
+                    state_next = state;
                 end
             end
             PROC:
             begin
                 if(chunk_compress_update)
                 begin
-                    state <= FINISH;
+                    state_next = FINISH;
                 end
                 else
                 begin
-                    state <= state;
+                    state_next = state;
                 end
             end
             FINISH:
             begin
-                state <= IDLE;
+                state_next = IDLE;
             end
         endcase
+    end
+end
+
+always@(posedge clk or negedge rst_n)
+begin
+    if(!rst_n) begin
+        irq_finish <= 1'b0;
+    end else begin
+        irq_finish <= state == FINISH;
     end
 end
 
