@@ -253,28 +253,42 @@ begin
     axil_wait(3);
     axil_write(32'h00, 32'b11);
 
-    // repeat(16) axil_write(32'h04, 32'hadadadad);
-    axil_write(32'h10, 32'h6c6c6568);
-    axil_write(32'h11, 32'h6f77206f);
-    axil_write(32'h12, 32'h80646c72);
-    axil_write(32'h13, 32'h00000000);
-    axil_write(32'h14, 32'h00000000);
-    axil_write(32'h15, 32'h00000000);
-    axil_write(32'h16, 32'h00000000);
-    axil_write(32'h17, 32'h00000000);
-    axil_write(32'h18, 32'h00000000);
-    axil_write(32'h19, 32'h00000000);
-    axil_write(32'h1a, 32'h00000000);
-    axil_write(32'h1b, 32'h00000000);
-    axil_write(32'h1c, 32'h00000000);
-    axil_write(32'h1d, 32'h00000000);
-    axil_write(32'h1e, 32'h00000000);
-    axil_write(32'h1f, 32'h58000000);
-
-    axil_read(32'h00, temp);
-    $display("[%m]#%t status: 0x%08x", $time, temp);
+    axil_write(32'h10, 32'h64343962);
+    axil_write(32'h10, 32'h39623732);
+    axil_write(32'h10, 32'h64343339);
+    axil_write(32'h10, 32'h38306533);
+    axil_write(32'h10, 32'h65323561);
+    axil_write(32'h10, 32'h37643235);
+    axil_write(32'h10, 32'h64376164);
+    axil_write(32'h10, 32'h61666261);
+    axil_write(32'h10, 32'h34383463);
+    axil_write(32'h10, 32'h33656665);
+    axil_write(32'h10, 32'h33356137);
+    axil_write(32'h10, 32'h65653038);
+    axil_write(32'h10, 32'h38383039);
+    axil_write(32'h10, 32'h63613766);
+    axil_write(32'h10, 32'h66653265);
+    axil_write(32'h10, 32'h39656463);
 
     @(posedge irq_hash_finish);
+    axil_write(32'h10, 32'h00000080);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00000000);
+    axil_write(32'h10, 32'h00020000);
+    @(posedge irq_hash_finish);
+
     axil_wait(4);
     axil_read(32'h08, sha256_result[0]);
     axil_read(32'h09, sha256_result[1]);
@@ -287,7 +301,7 @@ begin
     axil_wait(8);
 
     dump_sha256_result();
-    $display("expect: b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
+    // $display("expect: b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
     $finish;
 end
 
