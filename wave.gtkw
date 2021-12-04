@@ -1,50 +1,64 @@
 [*]
-[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Mon Oct 12 17:19:19 2020
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Sun Nov 21 17:39:38 2021
 [*]
-[dumpfile] "C:\Users\zuna\build_ground\sha256-axi-lite\wave.vcd"
-[dumpfile_mtime] "Mon Oct 12 17:17:24 2020"
-[dumpfile_size] 15053
-[savefile] "C:\Users\zuna\build_ground\sha256-axi-lite\wave.gtkw"
+[dumpfile] "/home/zuan/cache/build_ground/ip_repo/sha256_axi_1.0/hdl/wave.vcd"
+[dumpfile_mtime] "Sun Nov 21 17:39:05 2021"
+[dumpfile_size] 128992
+[savefile] "/home/zuan/cache/build_ground/ip_repo/sha256_axi_1.0/hdl/wave.gtkw"
 [timestart] 0
-[size] 2560 1244
-[pos] -1 116
-*-18.000000 938000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[size] 2560 1362
+[pos] 2560 0
+*-18.000000 515000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [sst_width] 239
 [signals_width] 320
 [sst_expanded] 1
-[sst_vpaned_height] 372
+[sst_vpaned_height] 414
+@29
+tb_axi_sha256.interrupt_busy
 @28
-tb_axi_sha256.aclk[0]
-tb_axi_sha256.aresetn[0]
-tb_axi_sha256.s_axi_aclk[0]
+tb_axi_sha256.s_axi_aclk
 @22
-tb_axi_sha256.s_axi_araddr[5:0]
+tb_axi_sha256.s_axi_araddr[7:0]
 @28
-tb_axi_sha256.s_axi_aresetn[0]
-tb_axi_sha256.s_axi_arready[0]
-tb_axi_sha256.s_axi_arvalid[0]
+tb_axi_sha256.s_axi_aresetn
+tb_axi_sha256.s_axi_arready
+tb_axi_sha256.s_axi_arvalid
 @22
-tb_axi_sha256.s_axi_awaddr[5:0]
+tb_axi_sha256.s_axi_awaddr[7:0]
 @28
-tb_axi_sha256.s_axi_awready[0]
-tb_axi_sha256.s_axi_awvalid[0]
-tb_axi_sha256.s_axi_bready[0]
+tb_axi_sha256.s_axi_awready
+tb_axi_sha256.s_axi_awvalid
+tb_axi_sha256.s_axi_bready
 tb_axi_sha256.s_axi_bresp[1:0]
-tb_axi_sha256.s_axi_bvalid[0]
-tb_axi_sha256.s_axi_rready[0]
+tb_axi_sha256.s_axi_bvalid
+@22
+tb_axi_sha256.s_axi_rdata[31:0]
+@28
+tb_axi_sha256.s_axi_rready
 tb_axi_sha256.s_axi_rresp[1:0]
-tb_axi_sha256.s_axi_rvalid[0]
+tb_axi_sha256.s_axi_rvalid
 @22
 tb_axi_sha256.s_axi_wdata[31:0]
 @28
-tb_axi_sha256.s_axi_wready[0]
+tb_axi_sha256.s_axi_wready
 @22
 tb_axi_sha256.s_axi_wstrb[3:0]
 @28
-tb_axi_sha256.s_axi_wvalid[0]
+tb_axi_sha256.s_axi_wvalid
 @22
 [color] 2
 tb_axi_sha256.s_axi_rdata[31:0]
+@28
+tb_axi_sha256.aclk
+@22
+tb_axi_sha256.s_axi_wstrb[3:0]
+@28
+tb_axi_sha256.aresetn
+@22
+tb_axi_sha256.s_axi_wdata[31:0]
+@28
+tb_axi_sha256.s_axi_rresp[1:0]
+tb_axi_sha256.s_axi_bresp[1:0]
 [pattern_trace] 1
 [pattern_trace] 0

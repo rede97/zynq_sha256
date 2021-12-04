@@ -37,7 +37,8 @@ module sha256(
            output [31:0] hash5,
            output [31:0] hash6,
            output [31:0] hash7,
-           output hash_vaild_o
+           output wire hash_busy_o,
+           output reg irq_finish
        );
 
 localparam  IDLE = 0,
@@ -45,7 +46,8 @@ localparam  IDLE = 0,
             PROC = 2,
             FINISH = 3;
 
-reg[3:0] state;
+reg[1:0] state;
+reg[1:0] state_next;
 reg[7:0] counter;
 wire[31:0] dat_msb_i;
 wire[5:0] k_addr;
@@ -57,19 +59,25 @@ wire chunk_compress_update;
 
 assign k_addr = counter[5:0] - 6'h10;
 assign chunk_compress_update = counter == 8'h50;
-assign hash_vaild_o = state == IDLE;
-assign chunk_clr = (~dat_vaild_i & hash_vaild_o) | state == FINISH;
+assign hash_busy_o = state == PROC | state == FINISH;
+assign chunk_clr = (~dat_vaild_i & (state == IDLE)) | state == FINISH;
 assign state_is_proc = state == PROC;
 assign dat_msb_i = {dat_lsb_i[7:0], dat_lsb_i[15:8], dat_lsb_i[23:16], dat_lsb_i[31:24]};
 
-always@(posedge clk or negedge rst_n) begin
-    if(rst_n == 1'b0 | chunk_clr) begin
+always@(posedge clk or negedge rst_n)
+begin
+    if(rst_n == 1'b0 | chunk_clr)
+    begin
         counter <= 8'h0;
     end
-    else begin
-        if(dat_vaild_i | state_is_proc) begin
+    else
+    begin
+        if(dat_vaild_i | state_is_proc)
+        begin
             counter <= counter + 8'h1;
-        end else begin
+        end
+        else
+        begin
             counter <= counter;
         end
     end
@@ -90,7 +98,7 @@ sha256_k sha256_k_u1(
              .addr(k_addr),
              .k_o(k_out)
          );
-         
+
 //sha256_k sha256_k_u1 (
 //  .a(k_addr),              // input wire [5 : 0] a
 //  .qspo_ce(state_is_proc),  // input wire qspo_ce
@@ -114,40 +122,77 @@ sha256_chunk_compress sha256_chunk_compress_u2(
                           .hash7(hash7)
                       );
 
-always@(posedge clk or negedge rst_n) begin
-    if(rst_n == 1'b0) begin
+always@(posedge clk or negedge rst_n)
+begin
+    if (rst_n == 1'b0)
+    begin
         state <= IDLE;
     end
-    else begin
+    else
+    begin
+        state <= state_next;
+    end
+end
+
+always@(*)
+begin
+    if(rst_n == 1'b0)
+    begin
+        state_next = IDLE;
+    end
+    else
+    begin
         case(state)
-            IDLE: begin
-                if(dat_vaild_i) begin
-                    state <= LOAD;
+            default: begin
+                state_next = IDLE;
+            end
+            IDLE:
+            begin
+                if(dat_vaild_i)
+                begin
+                    state_next = LOAD;
                 end
-                else begin
-                    state <= state;
+                else
+                begin
+                    state_next = state;
                 end
             end
-            LOAD: begin
-                if(counter == 8'h10) begin
-                    state <= PROC;
+            LOAD:
+            begin
+                if(counter == 8'h10)
+                begin
+                    state_next = PROC;
                 end
-                else begin
-                    state <= state;
-                end
-            end
-            PROC: begin
-                if(chunk_compress_update) begin
-                    state <= FINISH;
-                end
-                else begin
-                    state <= state;
+                else
+                begin
+                    state_next = state;
                 end
             end
-            FINISH: begin
-                state <= IDLE;
+            PROC:
+            begin
+                if(chunk_compress_update)
+                begin
+                    state_next = FINISH;
+                end
+                else
+                begin
+                    state_next = state;
+                end
+            end
+            FINISH:
+            begin
+                state_next = IDLE;
             end
         endcase
+    end
+end
+
+always@(posedge clk or negedge rst_n)
+begin
+    if(!rst_n) begin
+        irq_finish <= 1'b0;
+    end else begin
+        irq_finish <= state == FINISH;
     end
 end
 

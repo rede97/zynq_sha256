@@ -93,7 +93,7 @@ generate genvar i;
                 W[i] <= 32'h0;
             end
             else begin
-                if(enable) begin 
+                if(enable) begin
                     W[i] <= W[i + 1];
                 end else begin
                     W[i] <= W[i];
