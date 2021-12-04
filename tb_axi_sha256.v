@@ -301,7 +301,7 @@ begin
     axil_wait(8);
 
     dump_sha256_result();
-    // $display("expect: b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
+    $display("expect: 049da052634feb56ce6ec0bc648c672011edff1cb272b53113bbc90a8f00249c");
     $finish;
 end
 

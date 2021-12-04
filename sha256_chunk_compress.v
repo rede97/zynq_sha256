@@ -41,6 +41,11 @@ reg[31:0] h8[7:0];
 reg[31:0] abcd[3:0];
 reg[31:0] efgh[3:0];
 
+wire h8_update;
+wire[31:0] h8_next[7:0];
+
+wire pipeline_stop_n;
+
 wire[31:0] a;
 wire[31:0] b;
 wire[31:0] c;
@@ -90,6 +95,9 @@ assign maj = (a & b) ^ (a & c) ^ (b & c);
 assign tmp1 = h + s1 + ch + k_in + w_in;
 assign tmp2 = s0 + maj;
 
+assign pipeline_stop_n = rst_n & enable;
+assign h8_update = enable & update;
+
 function [31:0]lsb_to_msb;
     input [31:0]lsb;
     lsb_to_msb = {lsb[7:0], lsb[15:8], lsb[23:16], lsb[31:24]};
@@ -104,68 +112,58 @@ assign hash5 = lsb_to_msb(h8[5]);
 assign hash6 = lsb_to_msb(h8[6]);
 assign hash7 = lsb_to_msb(h8[7]);
 
-always@(posedge clk or negedge rst_n) begin
-    if(rst_n == 1'b0) begin
-        abcd[0] <= 32'h0;
+always@(posedge clk or negedge pipeline_stop_n) begin
+    if(!pipeline_stop_n) begin
+        abcd[0] <= h8[0];
     end
     else begin
-        if(enable) begin
-            abcd[0] <= tmp1 + tmp2;
-        end
-        else begin
-            abcd[0] <= h8[0];
-        end
+        abcd[0] <= tmp1 + tmp2;
     end
 end
 
-always@(posedge clk or negedge rst_n) begin
-    if(rst_n == 1'b0) begin
-        efgh[0] <= 32'h0;
+always@(posedge clk or negedge pipeline_stop_n) begin
+    if(!pipeline_stop_n) begin
+        efgh[0] <= h8[4];
     end
     else begin
-        if(enable) begin
-            efgh[0] <= d + tmp1;
-        end
-        else begin
-            efgh[0] <= h8[4];
-        end
+        efgh[0] <= d + tmp1;
     end
 end
 
 generate genvar i;
     for(i = 1; i < 4; i = i + 1) begin: chunk_compress_pipe
-        always@(posedge clk or negedge rst_n) begin
-            if(rst_n == 1'b0) begin
-                abcd[i] <= 32'h0;
+        always@(posedge clk or negedge pipeline_stop_n) begin
+            if(!pipeline_stop_n) begin
+                abcd[i] <= h8[i];
             end
             else begin
-                if(enable) begin
-                    abcd[i] <= abcd[i - 1];
-                end
-                else begin
-                    abcd[i] <= h8[i];
-                end
+                abcd[i] <= abcd[i - 1];
             end
         end
 
-        always@(posedge clk or negedge rst_n) begin
-            if(rst_n == 1'b0) begin
-                efgh[i] <= 32'h0;
+        always@(posedge clk or negedge pipeline_stop_n) begin
+            if(!pipeline_stop_n) begin
+                efgh[i] <= h8[i + 4];
             end
             else begin
-                if (enable) begin
-                    efgh[i] <= efgh[i - 1];
-                end
-                else begin
-                    efgh[i] <= h8[i + 4];
-                end
+                efgh[i] <= efgh[i - 1];
+
             end
         end
     end
 endgenerate
 
+assign h8_next[0] = h8_update ? h8[0] + a : h8[0];
+assign h8_next[1] = h8_update ? h8[1] + b : h8[1];
+assign h8_next[2] = h8_update ? h8[2] + c : h8[2];
+assign h8_next[3] = h8_update ? h8[3] + d : h8[3];
+assign h8_next[4] = h8_update ? h8[4] + e : h8[4];
+assign h8_next[5] = h8_update ? h8[5] + f : h8[5];
+assign h8_next[6] = h8_update ? h8[6] + g : h8[6];
+assign h8_next[7] = h8_update ? h8[7] + h : h8[7];
+
 always@(posedge clk or negedge rst_n) begin
-    if(rst_n == 1'b0) begin
+    if(!rst_n) begin
         h8[0] <= 32'h6a09e667;
         h8[1] <= 32'hbb67ae85;
         h8[2] <= 32'h3c6ef372;
@@ -176,26 +174,14 @@ always@(posedge clk or negedge rst_n) begin
         h8[7] <= 32'h5be0cd19;
     end
     else begin
-        if(enable & update) begin
-            h8[0] <= h8[0] + a;
-            h8[1] <= h8[1] + b;
-            h8[2] <= h8[2] + c;
-            h8[3] <= h8[3] + d;
-            h8[4] <= h8[4] + e;
-            h8[5] <= h8[5] + f;
-            h8[6] <= h8[6] + g;
-            h8[7] <= h8[7] + h;
-        end
-        else begin
-            h8[0] <= h8[0];
-            h8[1] <= h8[1];
-            h8[2] <= h8[2];
-            h8[3] <= h8[3];
-            h8[4] <= h8[4];
-            h8[5] <= h8[5];
-            h8[6] <= h8[6];
-            h8[7] <= h8[7];
-        end
+        h8[0] <= h8_next[0];
+        h8[1] <= h8_next[1];
+        h8[2] <= h8_next[2];
+        h8[3] <= h8_next[3];
+        h8[4] <= h8_next[4];
+        h8[5] <= h8_next[5];
+        h8[6] <= h8_next[6];
+        h8[7] <= h8_next[7];
     end
 end
 
