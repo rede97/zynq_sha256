@@ -24,7 +24,7 @@ module sha256_chunk_process(
            input clk,
            input rst_n,
            input clear,
-           input proc_ninit,
+           input process_start,
            input dat_vaild_i,
            input[31:0] dat_msb_i,
            output[31:0] w_out
@@ -33,7 +33,7 @@ module sha256_chunk_process(
 reg[31:0] W[15:0];
 wire[31:0] w_in;
 wire[31:0] w_new;
-wire enable;
+wire pipeline_start;
 
 wire[31:0] w_m15;
 wire[31:0] w_m15_rr7;
@@ -48,7 +48,7 @@ wire[31:0] w_m7;
 reg[31:0] s0;
 reg[31:0] s1;
 
-assign enable = dat_vaild_i | proc_ninit;
+assign pipeline_start = dat_vaild_i | process_start;
 
 assign w_m16 = W[0];
 
@@ -61,7 +61,7 @@ always@(posedge clk or negedge rst_n) begin
     if(!rst_n | clear) begin
         s0 <= 32'h0;
     end else begin
-        if(enable) begin
+        if(pipeline_start) begin
             s0 <= w_m15_rr7 ^ w_m15_rr18 ^ w_m15_r3;
         end else begin
             s0 <= s0;
@@ -80,7 +80,7 @@ always@(posedge clk or negedge rst_n) begin
     if(!rst_n | clear) begin
         s1 <= 32'h0;
     end else begin
-        if(enable) begin
+        if(pipeline_start) begin
             s1 <= w_m2_rr17 ^ w_m2_rr19 ^ w_m2_r10;
         end else begin
             s1 <= s1;
@@ -90,17 +90,16 @@ end
 
 assign w_new = (w_m16 + s0) + (w_m7 + s1);
 
-assign w_in = proc_ninit ? w_new : dat_msb_i;
+assign w_in = process_start ? w_new : dat_msb_i;
 assign w_out = W[0];
 
 always@(posedge clk or negedge rst_n) begin
-    if(rst_n == 1'b0 | clear) begin
+    if(!rst_n | clear) begin
         W[15] <= 32'h0;
     end
     else begin
-        if(enable) begin
+        if(pipeline_start) begin
             W[15] <= w_in;
-            $display("[%m]#%t INFO: Load: 0x%08x", $time, w_in);
         end else begin
             W[15] <= W[15];
         end
@@ -110,11 +109,11 @@ end
 generate genvar i;
     for(i = 0; i < 15; i = i + 1) begin: chunk_proc_pipeline
         always@(posedge clk or negedge rst_n) begin
-            if(rst_n == 1'b0 | clear) begin
+            if(!rst_n | clear) begin
                 W[i] <= 32'h0;
             end
             else begin
-                if(enable) begin
+                if(pipeline_start) begin
                     W[i] <= W[i + 1];
                 end else begin
                     W[i] <= W[i];

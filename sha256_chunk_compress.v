@@ -44,7 +44,7 @@ reg[31:0] efgh[3:0];
 wire h8_update;
 wire[31:0] h8_next[7:0];
 
-wire pipeline_stop_n;
+wire not_enable;
 
 wire[31:0] a;
 wire[31:0] b;
@@ -88,15 +88,15 @@ assign e_rr6 = {e[5:0], e[31:6]};
 assign e_rr11 = {e[10:0], e[31:11]};
 assign e_rr25 = {e[24:0], e[31:25]};
 
-assign s1 = e_rr6 ^ e_rr11 ^ e_rr25;
 assign s0 = a_rr2 ^ a_rr13 ^ a_rr22;
+assign s1 = e_rr6 ^ e_rr11 ^ e_rr25;
 assign ch = (e & f) ^ ((~e) & g);
 assign maj = (a & b) ^ (a & c) ^ (b & c);
 assign tmp1 = h + s1 + ch + k_in + w_in;
 assign tmp2 = s0 + maj;
 
-assign pipeline_stop_n = rst_n & enable;
 assign h8_update = enable & update;
+assign not_enable = !enable;
 
 function [31:0]lsb_to_msb;
     input [31:0]lsb;
@@ -112,8 +112,8 @@ assign hash5 = lsb_to_msb(h8[5]);
 assign hash6 = lsb_to_msb(h8[6]);
 assign hash7 = lsb_to_msb(h8[7]);
 
-always@(posedge clk or negedge pipeline_stop_n) begin
-    if(!pipeline_stop_n) begin
+always@(posedge clk or negedge rst_n) begin
+    if(!rst_n | not_enable) begin
         abcd[0] <= h8[0];
     end
     else begin
@@ -121,8 +121,8 @@ always@(posedge clk or negedge pipeline_stop_n) begin
     end
 end
 
-always@(posedge clk or negedge pipeline_stop_n) begin
-    if(!pipeline_stop_n) begin
+always@(posedge clk or negedge rst_n) begin
+    if(!rst_n | not_enable) begin
         efgh[0] <= h8[4];
     end
     else begin
@@ -132,8 +132,8 @@ end
 
 generate genvar i;
     for(i = 1; i < 4; i = i + 1) begin: chunk_compress_pipe
-        always@(posedge clk or negedge pipeline_stop_n) begin
-            if(!pipeline_stop_n) begin
+        always@(posedge clk or negedge rst_n) begin
+            if(!rst_n | not_enable) begin
                 abcd[i] <= h8[i];
             end
             else begin
@@ -141,13 +141,12 @@ generate genvar i;
             end
         end
 
-        always@(posedge clk or negedge pipeline_stop_n) begin
-            if(!pipeline_stop_n) begin
+        always@(posedge clk or negedge rst_n) begin
+            if(!rst_n | not_enable) begin
                 efgh[i] <= h8[i + 4];
             end
             else begin
                 efgh[i] <= efgh[i - 1];
-
             end
         end
     end
