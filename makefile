@@ -1,6 +1,9 @@
-all: 
-	iverilog -o wave -y ./ -Wall tb_axi_sha256.v
-	vvp -n wave
+TOOL ?= MODELSIM
 
-run:
-	gtkwave wave.gtkw
+include mkconfig/common.mk
+
+ifeq ($(TOOL), MODELSIM) 
+include mkconfig/modelsim.mk
+else
+include mkconfig/iverilog.mk
+endif

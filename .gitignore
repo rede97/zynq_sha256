@@ -3,3 +3,6 @@ xgui/
 wave
 component.xml
 .vscode/
+test/
+work/
+modelsim.ini
