@@ -100,7 +100,6 @@ always@(posedge clk or negedge rst_n) begin
     else begin
         if(enable) begin
             W[15] <= w_in;
-            $display("[%m]#%t INFO: Load: 0x%08x", $time, w_in);
         end else begin
             W[15] <= W[15];
         end
