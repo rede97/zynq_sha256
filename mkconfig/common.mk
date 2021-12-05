@@ -22,13 +22,13 @@ $(LOG_DIR):
 	$(V)mkdir -p $@
 
 print_work_sources:
-	$(V)@echo $(WORK_SOURCES)
+	@echo $(WORK_SOURCES)
 
 print_test_sources:
-	$(V)@echo $(TEST_SOURCES)
+	@echo $(TEST_SOURCES)
 	
 print_testbenches:
-	$(V)@echo $(TESTBENCHES)
+	@echo $(TESTBENCHES)
 
 clean: sim_clean
 	$(V)rm -rfv sim

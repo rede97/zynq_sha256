@@ -6,8 +6,9 @@
 	$(V)vvp -n $@ -lxt2
 	-$(V)mv *.vcd $(OUT_DIR);
 	-$(V)mv *.log $(LOG_DIR);
+	-$(V)rm -rfv $@
 
 simulate: $(TESTBENCHES)
 
 sim_clean:
-	$(V)rm -rfv $(TESTBENCHES)
+	-$(V)rm -rfv $(TESTBENCHES)

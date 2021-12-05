@@ -5,4 +5,5 @@ component.xml
 .vscode/
 test/
 work/
+sim/log/
 modelsim.ini
