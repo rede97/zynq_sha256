@@ -57,10 +57,10 @@ wire chunk_clr;
 wire[31:0] k_out;
 wire[31:0] w_out;
 wire state_is_proc;
-wire chunk_compress_update;
+wire update_hash;
 
 assign k_addr = counter[5:0] - 6'h10;
-assign chunk_compress_update = counter == 8'h50;
+assign update_hash = counter == 8'h50;
 assign hash_busy_o = state == PROC | state == FINISH;
 assign chunk_clr = (~dat_vaild_i & (state == IDLE)) | state == FINISH;
 assign state_is_proc = state == PROC;
@@ -69,7 +69,7 @@ assign dat_msb_i = {dat_lsb_i[7:0], dat_lsb_i[15:8], dat_lsb_i[23:16], dat_lsb_i
 assign counter_nxt = dat_vaild_i | state_is_proc ? counter + 8'h1 : counter;
 always@(posedge clk or negedge rst_n)
 begin
-    if(rst_n == 1'b0 | chunk_clr)
+    if(!rst_n | chunk_clr)
     begin
         counter <= 8'h0;
     end
@@ -104,8 +104,8 @@ sha256_k sha256_k_u1(
 sha256_chunk_compress sha256_chunk_compress_u2(
                           .clk(clk),
                           .rst_n(rst_n),
-                          .enable(state_is_proc),
-                          .update(chunk_compress_update),
+                          .proc_start(state_is_proc),
+                          .update_hash(update_hash),
                           .w_in(w_out),
                           .k_in(k_out),
                           .hash0(hash0),
@@ -166,7 +166,7 @@ begin
             end
             PROC:
             begin
-                if(chunk_compress_update)
+                if(update_hash)
                 begin
                     state_next = FINISH;
                 end

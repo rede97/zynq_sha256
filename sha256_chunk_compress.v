@@ -23,8 +23,8 @@
 module sha256_chunk_compress(
            input clk,
            input rst_n,
-           input enable,
-           input update,
+           input proc_start,
+           input update_hash,
            input[31:0] w_in,
            input[31:0] k_in,
            output[31:0] hash0,
@@ -95,8 +95,8 @@ assign maj = (a & b) ^ (a & c) ^ (b & c);
 assign tmp1 = h + s1 + ch + k_in + w_in;
 assign tmp2 = s0 + maj;
 
-assign h8_update = enable & update;
-assign not_enable = !enable;
+assign h8_update = proc_start & update_hash;
+assign not_enable = !proc_start;
 
 function [31:0]lsb_to_msb;
     input [31:0]lsb;
