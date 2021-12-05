@@ -10,8 +10,7 @@ reg[31:0] rom_k[63:0];
 
 
 initial begin
-    $readmemb("sha256_k.mif", rom_k);
-    $display("%08x", rom_k[0]);
+    $readmemb("sha256_k.mif", rom_k, 0, 63);
 end
 
 assign k_o = enable ? rom_k[addr] : 32'h0;

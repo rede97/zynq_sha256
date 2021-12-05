@@ -49,37 +49,32 @@ localparam  IDLE = 0,
 reg[1:0] state;
 reg[1:0] state_next;
 reg[7:0] counter;
+
+wire[7:0] counter_nxt;
 wire[31:0] dat_msb_i;
 wire[5:0] k_addr;
 wire chunk_clr;
 wire[31:0] k_out;
 wire[31:0] w_out;
-wire state_is_proc;
-wire chunk_compress_update;
+wire next_state_is_proc;
+wire compress_start;
+wire update_hash;
 
 assign k_addr = counter[5:0] - 6'h10;
-assign chunk_compress_update = counter == 8'h50;
+assign update_hash = state_next == FINISH;
 assign hash_busy_o = state == PROC | state == FINISH;
 assign chunk_clr = (~dat_vaild_i & (state == IDLE)) | state == FINISH;
-assign state_is_proc = state == PROC;
+assign next_state_is_proc = state_next == PROC;
+assign compress_start = state == PROC;
 assign dat_msb_i = {dat_lsb_i[7:0], dat_lsb_i[15:8], dat_lsb_i[23:16], dat_lsb_i[31:24]};
+assign counter_nxt = chunk_clr ? 8'h0: dat_vaild_i | next_state_is_proc ? counter + 8'h1 : counter;
 
-always@(posedge clk or negedge rst_n)
-begin
-    if(rst_n == 1'b0 | chunk_clr)
-    begin
+always@(posedge clk or negedge rst_n) begin
+    if(!rst_n) begin
         counter <= 8'h0;
     end
-    else
-    begin
-        if(dat_vaild_i | state_is_proc)
-        begin
-            counter <= counter + 8'h1;
-        end
-        else
-        begin
-            counter <= counter;
-        end
+    else begin
+        counter <= counter_nxt;
     end
 end
 
@@ -87,29 +82,29 @@ sha256_chunk_process sha256_chunk_process_u0(
                          .clk(clk),
                          .rst_n(rst_n),
                          .clear(chunk_clr),
-                         .proc_ninit(state_is_proc),
+                         .process_start(next_state_is_proc),
                          .dat_vaild_i(dat_vaild_i),
                          .dat_msb_i(dat_msb_i),
                          .w_out(w_out)
                      );
 
 sha256_k sha256_k_u1(
-             .enable(state_is_proc),
+             .enable(rst_n),
              .addr(k_addr),
              .k_o(k_out)
          );
 
 //sha256_k sha256_k_u1 (
 //  .a(k_addr),              // input wire [5 : 0] a
-//  .qspo_ce(state_is_proc),  // input wire qspo_ce
+//  .qspo_ce(next_state_is_proc),  // input wire qspo_ce
 //  .spo(k_out)          // output wire [31 : 0] spo
 //);
 
 sha256_chunk_compress sha256_chunk_compress_u2(
                           .clk(clk),
                           .rst_n(rst_n),
-                          .enable(state_is_proc),
-                          .update(chunk_compress_update),
+                          .compress_start(compress_start),
+                          .update_hash(update_hash),
                           .w_in(w_out),
                           .k_in(k_out),
                           .hash0(hash0),
@@ -122,76 +117,60 @@ sha256_chunk_compress sha256_chunk_compress_u2(
                           .hash7(hash7)
                       );
 
-always@(posedge clk or negedge rst_n)
-begin
-    if (rst_n == 1'b0)
-    begin
+always@(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
         state <= IDLE;
     end
-    else
-    begin
+    else begin
         state <= state_next;
     end
 end
 
-always@(*)
-begin
-    if(rst_n == 1'b0)
-    begin
+always@(*) begin
+    if(!rst_n) begin
         state_next = IDLE;
     end
-    else
-    begin
+    else begin
         case(state)
             default: begin
                 state_next = IDLE;
             end
-            IDLE:
-            begin
-                if(dat_vaild_i)
-                begin
+            IDLE: begin
+                if(dat_vaild_i) begin
                     state_next = LOAD;
                 end
-                else
-                begin
+                else begin
                     state_next = state;
                 end
             end
-            LOAD:
-            begin
-                if(counter == 8'h10)
-                begin
+            LOAD: begin
+                if(counter == 8'h10) begin
                     state_next = PROC;
                 end
-                else
-                begin
+                else begin
                     state_next = state;
                 end
             end
-            PROC:
-            begin
-                if(chunk_compress_update)
-                begin
+            PROC: begin
+                if(counter == 8'h50) begin
                     state_next = FINISH;
                 end
-                else
-                begin
+                else begin
                     state_next = state;
                 end
             end
-            FINISH:
-            begin
+            FINISH: begin
                 state_next = IDLE;
             end
         endcase
     end
 end
 
-always@(posedge clk or negedge rst_n)
-begin
+always@(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         irq_finish <= 1'b0;
-    end else begin
+    end
+    else begin
         irq_finish <= state == FINISH;
     end
 end
