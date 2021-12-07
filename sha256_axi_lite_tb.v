@@ -2,12 +2,12 @@
 
 // `include "sha256_v1_0_S00_AXI.v"
 
-module axi_sha256_tb;
+module sha256_axi_lite_tb;
 
 initial
 begin
-    $dumpfile("wave.vcd");        //生成的vcd文件名称
-    $dumpvars(0, axi_sha256_tb);    //tb模块名称
+    $dumpfile("sha256_axi_lite.vcd");        //生成的vcd文件名称
+    $dumpvars(0, sha256_axi_lite_tb);    //tb模块名称
     $timeformat(-9, 2, "ns", 4);
 end
 
