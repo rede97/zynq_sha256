@@ -2,8 +2,7 @@
 
 module sha256_axi_full_tb;
 
-initial
-begin
+initial begin
     $dumpfile("sha256_axi_full.vcd");        //生成的vcd文件名称
     $dumpvars(0, sha256_axi_full_tb);    //tb模块名称
     $timeformat(-9, 2, "ns", 4);
@@ -66,11 +65,41 @@ wire axi_rlast;
 wire axi_rvaild;
 reg axi_rready;
 
-initial
-begin
+initial begin
     #0 aclk = 0;
     forever
         #(T/2) aclk = ~aclk;
+end
+
+initial begin
+    axi_awid = 0;
+    axi_awaddr = 0;
+    axi_awlen = 0;
+    axi_awsize = 0;
+    axi_awbrust = 0;
+    axi_awlock = 0;
+    axi_awcache = 0;
+    axi_awprot = 0;
+    axi_awqos = 0;
+    axi_awvaild = 0;
+    axi_awregion = 0;
+    axi_wdata = 0;
+    axi_wstrb = 0;
+    axi_wlast = 0;
+    axi_wvaild = 0;
+    axi_bready = 0;
+    axi_arid = 0;
+    axi_araddr = 0;
+    axi_arlen = 0;
+    axi_arsize = 0;
+    axi_arbrust = 0;
+    axi_arlock = 0;
+    axi_arcache = 0;
+    axi_arprot = 0;
+    axi_arqos = 0;
+    axi_arregion = 0;
+    axi_arvaild = 0;
+    axi_rready = 0;
 end
 
 sha256_full_v1_0 #(
@@ -132,10 +161,166 @@ sha256_full_v1_0 #(
                      //  .s00_axi_wuser(0'b0),
                  );
 
+localparam BURST_FIXED = 2'b00,
+           BURST_INC = 2'b01,
+           BURST_WRAP = 2'b10;
+
+task axi_wait;
+    input integer n;
+    begin
+        repeat(n) @(posedge aclk);
+    end
+endtask
+
+task axi_arclr;
+    begin
+        axi_araddr = 0;
+        axi_arlen = 0;
+        axi_arbrust = 0;
+        axi_arsize = 0;
+        axi_arvaild = 0;
+    end
+endtask
+
+task axi_rclr;
+    begin
+        axi_rready = 0;
+    end
+endtask
+
+task axi_awclr;
+    begin
+        axi_awaddr = 0;
+        axi_awlen = 0;
+        axi_awbrust = 0;
+        axi_awsize = 0;
+        axi_awvaild = 0;
+    end
+endtask
+
+task axi_wclr;
+    begin
+        axi_wdata = 0;
+        axi_wstrb = 0;
+        axi_wlast = 0;
+        axi_wvaild = 0;
+    end
+endtask
+
+task axi_bclr;
+    begin
+        axi_bready = 0;
+    end
+endtask
+
+reg[31:0] axi_buffer[255:0];
+task axi_read;
+    input [AXI_ADDR_WIDTH-3:0] raddr;
+    input [7:0] rlen;
+    input [1:0] burst;
+    integer addr_cnt;
+    begin
+        axi_araddr = {raddr, 2'b00};
+        axi_arlen = rlen - 1;
+        axi_arbrust = burst;
+        axi_arsize = 3'b010;
+        axi_arvaild = 1'b1;
+        addr_cnt = 0;
+        // wait arready
+        repeat(16) begin
+            axi_wait(1);
+            if (axi_arready) begin
+                axi_arclr;
+                // start read
+                axi_rready = 1'b1;
+                while(addr_cnt < rlen) begin
+                    axi_wait(1);
+                    if(axi_rvaild) begin
+                        if(axi_rresp != 2'b00) begin
+                            $display("[%m]#%t ERROR: Invaild rresp: %d", $time, axi_bresp);
+                            $stop;
+                        end
+                        axi_buffer[addr_cnt] = axi_rdata;
+                        addr_cnt = addr_cnt + 1;
+                    end
+                end
+                axi_rclr;
+                disable axi_read;
+            end
+        end
+        $display("[%m]#%t ERROR: Timeout, wait arready", $time);
+        $stop;
+    end
+endtask
+
+task axi_write;
+    input [AXI_ADDR_WIDTH-3:0] waddr;
+    input [7:0] wlen;
+    input [1:0] burst;
+    integer addr_cnt;
+    begin
+        axi_awaddr = waddr;
+        axi_awlen = wlen - 1;
+        axi_awbrust = burst;
+        axi_awsize = 3'b010;
+        axi_awvaild = 1'b1;
+        addr_cnt = 0;
+        // wait awready
+        repeat(16) begin
+            axi_wait(1);
+            if(axi_awready) begin
+                axi_awclr;
+                // start write
+                axi_wvaild = 1'b1;
+                axi_wstrb = 4'b1111;
+                while (addr_cnt < wlen) begin
+                    if (addr_cnt + 1 == wlen) begin
+                        axi_wlast = 1'b1;
+                    end
+                    axi_wdata = axi_buffer[addr_cnt];
+                    axi_wait(1);
+                    if (axi_wready) begin
+                        addr_cnt = addr_cnt + 1;
+                    end
+                end
+                axi_wclr;
+                // wait bresp
+                repeat(16) begin
+                    axi_wait(1);
+                    if(axi_bvaild) begin
+                        if(axi_bresp != 2'b00) begin
+                            $display("[%m]#%t ERROR: Invaild bresp: %d", $time, axi_bresp);
+                            $stop;
+                        end
+                        axi_bready = 1'b1;
+                        axi_wait(1);
+                        axi_bclr;
+                        disable axi_write;
+                    end
+                end
+                $display("[%m]#%t ERROR: Timeout, wait bresp", $time);
+                $stop;
+            end
+        end
+        $display("[%m]#%t ERROR: Timeout, wait awready", $time);
+        $stop;
+    end
+endtask
+
+
 initial begin
     aresetn = 1'b0;
     repeat(5) @(posedge aclk);
+    aresetn = 1'b1;
+    axi_buffer[0] = 32'h0badbeaf;
+    axi_buffer[1] = 32'h1badbeaf;
+    axi_buffer[2] = 32'h2badbeaf;
+    axi_buffer[3] = 32'h3badbeaf;
+    axi_write(0, 4, BURST_INC);
+    axi_read(0, 4, BURST_INC);
 
+
+    repeat(16) @(posedge aclk);
     $finish;
 end
 endmodule
