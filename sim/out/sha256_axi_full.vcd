@@ -1,0 +1,394 @@
+$date
+	Wed Dec  8 02:10:42 2021
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module sha256_axi_full_tb $end
+$var wire 1 ! axi_wready $end
+$var wire 1 " axi_rvaild $end
+$var wire 2 # axi_rresp [1:0] $end
+$var wire 1 $ axi_rlast $end
+$var wire 1 % axi_rid $end
+$var wire 32 & axi_rdata [31:0] $end
+$var wire 1 ' axi_bvaild $end
+$var wire 2 ( axi_bresp [1:0] $end
+$var wire 1 ) axi_bid $end
+$var wire 1 * axi_awready $end
+$var wire 1 + axi_arready $end
+$var reg 1 , aclk $end
+$var reg 1 - aresetn $end
+$var reg 8 . axi_araddr [7:0] $end
+$var reg 2 / axi_arbrust [1:0] $end
+$var reg 4 0 axi_arcache [3:0] $end
+$var reg 8 1 axi_arlen [7:0] $end
+$var reg 1 2 axi_arlock $end
+$var reg 3 3 axi_arprot [2:0] $end
+$var reg 4 4 axi_arqos [3:0] $end
+$var reg 4 5 axi_arregion [3:0] $end
+$var reg 3 6 axi_arsize [2:0] $end
+$var reg 1 7 axi_arvaild $end
+$var reg 8 8 axi_awaddr [7:0] $end
+$var reg 2 9 axi_awbrust [1:0] $end
+$var reg 4 : axi_awcache [3:0] $end
+$var reg 1 ; axi_awid $end
+$var reg 8 < axi_awlen [7:0] $end
+$var reg 1 = axi_awlock $end
+$var reg 3 > axi_awprot [2:0] $end
+$var reg 4 ? axi_awqos [3:0] $end
+$var reg 4 @ axi_awregion [3:0] $end
+$var reg 3 A axi_awsize [2:0] $end
+$var reg 1 B axi_awvaild $end
+$var reg 1 C axi_bready $end
+$var reg 1 D axi_rready $end
+$var reg 32 E axi_wdata [31:0] $end
+$var reg 1 F axi_wlast $end
+$var reg 4 G axi_wstrb [3:0] $end
+$var reg 1 H axi_wvaild $end
+$scope module sha256_axi_full_inst $end
+$var wire 1 , s00_axi_aclk $end
+$var wire 8 I s00_axi_araddr [7:0] $end
+$var wire 2 J s00_axi_arburst [1:0] $end
+$var wire 4 K s00_axi_arcache [3:0] $end
+$var wire 1 - s00_axi_aresetn $end
+$var wire 8 L s00_axi_arlen [7:0] $end
+$var wire 1 2 s00_axi_arlock $end
+$var wire 3 M s00_axi_arprot [2:0] $end
+$var wire 4 N s00_axi_arqos [3:0] $end
+$var wire 4 O s00_axi_arregion [3:0] $end
+$var wire 3 P s00_axi_arsize [2:0] $end
+$var wire 2 Q s00_axi_aruser [-1:0] $end
+$var wire 1 7 s00_axi_arvalid $end
+$var wire 8 R s00_axi_awaddr [7:0] $end
+$var wire 2 S s00_axi_awburst [1:0] $end
+$var wire 4 T s00_axi_awcache [3:0] $end
+$var wire 1 ; s00_axi_awid $end
+$var wire 8 U s00_axi_awlen [7:0] $end
+$var wire 1 = s00_axi_awlock $end
+$var wire 3 V s00_axi_awprot [2:0] $end
+$var wire 4 W s00_axi_awqos [3:0] $end
+$var wire 4 X s00_axi_awregion [3:0] $end
+$var wire 3 Y s00_axi_awsize [2:0] $end
+$var wire 2 Z s00_axi_awuser [-1:0] $end
+$var wire 1 B s00_axi_awvalid $end
+$var wire 1 C s00_axi_bready $end
+$var wire 1 D s00_axi_rready $end
+$var wire 32 [ s00_axi_wdata [31:0] $end
+$var wire 1 F s00_axi_wlast $end
+$var wire 4 \ s00_axi_wstrb [3:0] $end
+$var wire 2 ] s00_axi_wuser [-1:0] $end
+$var wire 1 H s00_axi_wvalid $end
+$var wire 1 ! s00_axi_wready $end
+$var wire 1 " s00_axi_rvalid $end
+$var wire 2 ^ s00_axi_ruser [-1:0] $end
+$var wire 2 _ s00_axi_rresp [1:0] $end
+$var wire 1 $ s00_axi_rlast $end
+$var wire 1 % s00_axi_rid $end
+$var wire 32 ` s00_axi_rdata [31:0] $end
+$var wire 1 ' s00_axi_bvalid $end
+$var wire 2 a s00_axi_buser [-1:0] $end
+$var wire 2 b s00_axi_bresp [1:0] $end
+$var wire 1 ) s00_axi_bid $end
+$var wire 1 * s00_axi_awready $end
+$var wire 1 + s00_axi_arready $end
+$var wire 1 % s00_axi_arid $end
+$scope module sha256_full_v1_0_S00_AXI_inst $end
+$var wire 1 , S_AXI_ACLK $end
+$var wire 8 c S_AXI_ARADDR [7:0] $end
+$var wire 2 d S_AXI_ARBURST [1:0] $end
+$var wire 4 e S_AXI_ARCACHE [3:0] $end
+$var wire 1 - S_AXI_ARESETN $end
+$var wire 1 % S_AXI_ARID $end
+$var wire 8 f S_AXI_ARLEN [7:0] $end
+$var wire 1 2 S_AXI_ARLOCK $end
+$var wire 3 g S_AXI_ARPROT [2:0] $end
+$var wire 4 h S_AXI_ARQOS [3:0] $end
+$var wire 1 + S_AXI_ARREADY $end
+$var wire 4 i S_AXI_ARREGION [3:0] $end
+$var wire 3 j S_AXI_ARSIZE [2:0] $end
+$var wire 2 k S_AXI_ARUSER [-1:0] $end
+$var wire 1 7 S_AXI_ARVALID $end
+$var wire 8 l S_AXI_AWADDR [7:0] $end
+$var wire 2 m S_AXI_AWBURST [1:0] $end
+$var wire 4 n S_AXI_AWCACHE [3:0] $end
+$var wire 1 ; S_AXI_AWID $end
+$var wire 8 o S_AXI_AWLEN [7:0] $end
+$var wire 1 = S_AXI_AWLOCK $end
+$var wire 3 p S_AXI_AWPROT [2:0] $end
+$var wire 4 q S_AXI_AWQOS [3:0] $end
+$var wire 1 * S_AXI_AWREADY $end
+$var wire 4 r S_AXI_AWREGION [3:0] $end
+$var wire 3 s S_AXI_AWSIZE [2:0] $end
+$var wire 2 t S_AXI_AWUSER [-1:0] $end
+$var wire 1 B S_AXI_AWVALID $end
+$var wire 1 ) S_AXI_BID $end
+$var wire 1 C S_AXI_BREADY $end
+$var wire 2 u S_AXI_BRESP [1:0] $end
+$var wire 2 v S_AXI_BUSER [-1:0] $end
+$var wire 1 ' S_AXI_BVALID $end
+$var wire 32 w S_AXI_RDATA [31:0] $end
+$var wire 1 % S_AXI_RID $end
+$var wire 1 $ S_AXI_RLAST $end
+$var wire 1 D S_AXI_RREADY $end
+$var wire 2 x S_AXI_RRESP [1:0] $end
+$var wire 2 y S_AXI_RUSER [-1:0] $end
+$var wire 1 " S_AXI_RVALID $end
+$var wire 32 z S_AXI_WDATA [31:0] $end
+$var wire 1 F S_AXI_WLAST $end
+$var wire 1 ! S_AXI_WREADY $end
+$var wire 4 { S_AXI_WSTRB [3:0] $end
+$var wire 2 | S_AXI_WUSER [-1:0] $end
+$var wire 1 H S_AXI_WVALID $end
+$var wire 1 } mem_select $end
+$var wire 6 ~ mem_address [5:0] $end
+$var wire 32 !" aw_wrap_size [31:0] $end
+$var wire 1 "" aw_wrap_en $end
+$var wire 32 #" ar_wrap_size [31:0] $end
+$var wire 1 $" ar_wrap_en $end
+$var reg 8 %" axi_araddr [7:0] $end
+$var reg 2 &" axi_arburst [1:0] $end
+$var reg 8 '" axi_arlen [7:0] $end
+$var reg 8 (" axi_arlen_cntr [7:0] $end
+$var reg 1 )" axi_arready $end
+$var reg 1 *" axi_arv_arr_flag $end
+$var reg 8 +" axi_awaddr [7:0] $end
+$var reg 2 ," axi_awburst [1:0] $end
+$var reg 8 -" axi_awlen [7:0] $end
+$var reg 8 ." axi_awlen_cntr [7:0] $end
+$var reg 1 /" axi_awready $end
+$var reg 1 0" axi_awv_awr_flag $end
+$var reg 2 1" axi_bresp [1:0] $end
+$var reg 2 2" axi_buser [-1:0] $end
+$var reg 1 3" axi_bvalid $end
+$var reg 32 4" axi_rdata [31:0] $end
+$var reg 1 5" axi_rlast $end
+$var reg 2 6" axi_rresp [1:0] $end
+$var reg 2 7" axi_ruser [-1:0] $end
+$var reg 1 8" axi_rvalid $end
+$var reg 1 9" axi_wready $end
+$scope begin BRAM_GEN[0] $end
+$var wire 1 :" mem_rden $end
+$var wire 1 ;" mem_wren $end
+$scope begin BYTE_BRAM_GEN[0] $end
+$var wire 8 <" data_in [7:0] $end
+$var wire 8 =" data_out [7:0] $end
+$upscope $end
+$scope begin BYTE_BRAM_GEN[1] $end
+$var wire 8 >" data_in [7:0] $end
+$var wire 8 ?" data_out [7:0] $end
+$upscope $end
+$scope begin BYTE_BRAM_GEN[2] $end
+$var wire 8 @" data_in [7:0] $end
+$var wire 8 A" data_out [7:0] $end
+$upscope $end
+$scope begin BYTE_BRAM_GEN[3] $end
+$var wire 8 B" data_in [7:0] $end
+$var wire 8 C" data_out [7:0] $end
+$upscope $end
+$upscope $end
+$scope begin genblk1 $end
+$upscope $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+bx C"
+bx B"
+bx A"
+bx @"
+bx ?"
+bx >"
+bx ="
+bx <"
+x;"
+x:"
+x9"
+x8"
+bx 7"
+bx 6"
+x5"
+bx 4"
+x3"
+bx 2"
+bx 1"
+x0"
+x/"
+bx ."
+bx -"
+bx ,"
+bx +"
+x*"
+x)"
+bx ("
+bx '"
+bx &"
+bx %"
+x$"
+bx #"
+x""
+bx !"
+bx ~
+1}
+bz |
+bx {
+bx z
+bx y
+bx x
+bx w
+bx v
+bx u
+bz t
+bx s
+bx r
+bx q
+bx p
+bx o
+bx n
+bx m
+bx l
+bz k
+bx j
+bx i
+bx h
+bx g
+bx f
+bx e
+bx d
+bx c
+bx b
+bx a
+bx `
+bx _
+bx ^
+bz ]
+bx \
+bx [
+bz Z
+bx Y
+bx X
+bx W
+bx V
+bx U
+bx T
+bx S
+bx R
+bz Q
+bx P
+bx O
+bx N
+bx M
+bx L
+bx K
+bx J
+bx I
+xH
+bx G
+xF
+bx E
+xD
+xC
+xB
+bx A
+bx @
+bx ?
+bx >
+x=
+bx <
+x;
+bx :
+bx 9
+bx 8
+x7
+bx 6
+bx 5
+bx 4
+bx 3
+x2
+bx 1
+bx 0
+bx /
+bx .
+0-
+0,
+x+
+x*
+x)
+bx (
+x'
+bx &
+z%
+x$
+bx #
+x"
+x!
+$end
+#5000
+b0 &
+b0 `
+b0 w
+b0 4"
+b0 ~
+1""
+1$"
+0;"
+00"
+0*
+0/"
+b0 !"
+b0 -"
+b0 ,"
+b0 ."
+b0 +"
+0!
+09"
+b0 a
+b0 v
+b0 2"
+b0 (
+b0 b
+b0 u
+b0 1"
+0'
+03"
+0:"
+0*"
+0+
+0)"
+b0 ^
+b0 y
+b0 7"
+0$
+05"
+b0 #"
+b0 '"
+b0 &"
+b0 ("
+b0 %"
+b0 #
+b0 _
+b0 x
+b0 6"
+0"
+08"
+1,
+#10000
+0,
+#15000
+1,
+#20000
+0,
+#25000
+1,
+#30000
+0,
+#35000
+1,
+#40000
+0,
+#45000
+1,
