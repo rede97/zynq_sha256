@@ -65,6 +65,9 @@ wire axi_rlast;
 wire axi_rvaild;
 reg axi_rready;
 
+// user
+wire [-1:0] void_user;
+
 initial begin
     #0 aclk = 0;
     forever
@@ -123,7 +126,7 @@ sha256_full_v1_0 #(
                      .s00_axi_arregion(axi_arregion),
                      .s00_axi_arsize(axi_arsize),
                      .s00_axi_arvalid(axi_arvaild),
-                     //  .s00_axi_aruser(0'b0),
+                     .s00_axi_aruser(void_user),
                      // write address channel
                      .s00_axi_awaddr(axi_awaddr[7:0]),
                      .s00_axi_awburst(axi_awbrust),
@@ -137,13 +140,13 @@ sha256_full_v1_0 #(
                      .s00_axi_awregion(axi_awregion),
                      .s00_axi_awsize(axi_awsize),
                      .s00_axi_awvalid(axi_awvaild),
-                     //  .s00_axi_awuser(0'b0),
+                     .s00_axi_awuser(void_user),
                      // write response
                      .s00_axi_bid(axi_bid),
                      .s00_axi_bready(axi_bready),
                      .s00_axi_bresp(axi_bresp),
                      .s00_axi_bvalid(axi_bvaild),
-                     //  .s00_axi_buser(0'b0),
+                     .s00_axi_buser(void_user),
                      // read data channel
                      .s00_axi_rdata(axi_rdata),
                      .s00_axi_rid(axi_rid),
@@ -151,14 +154,14 @@ sha256_full_v1_0 #(
                      .s00_axi_rready(axi_rready),
                      .s00_axi_rresp(axi_rresp),
                      .s00_axi_rvalid(axi_rvaild),
-                     //  .s00_axi_ruser(0'b0),
+                     .s00_axi_ruser(void_user),
                      // write data channel
                      .s00_axi_wdata(axi_wdata),
                      .s00_axi_wlast(axi_wlast),
                      .s00_axi_wready(axi_wready),
                      .s00_axi_wstrb(axi_wstrb),
-                     .s00_axi_wvalid(axi_wvaild)
-                     //  .s00_axi_wuser(0'b0),
+                     .s00_axi_wvalid(axi_wvaild),
+                     .s00_axi_wuser(void_user)
                  );
 
 localparam BURST_FIXED = 2'b00,
@@ -317,10 +320,9 @@ initial begin
     axi_buffer[2] = 32'h2badbeaf;
     axi_buffer[3] = 32'h3badbeaf;
     axi_write(0, 4, BURST_INC);
+    axi_wait(4);
     axi_read(0, 4, BURST_INC);
-
-
-    repeat(16) @(posedge aclk);
+    axi_wait(4);
     $finish;
 end
 endmodule
