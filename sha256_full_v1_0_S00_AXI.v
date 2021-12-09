@@ -27,7 +27,7 @@ module sha256_full_v1_0_S00_AXI #
        )
        (
            // Users to add ports here
-
+           output wire irq_hash_finish,
            // User ports ends
            // Do not modify the ports beyond this line
 
@@ -246,17 +246,13 @@ assign  ar_wrap_en = ((axi_araddr & ar_wrap_size) == ar_wrap_size)? 1'b1: 1'b0;
 // S_AXI_AWVALID and S_AXI_WVALID are asserted. axi_awready is
 // de-asserted when reset is low.
 
-always @( posedge S_AXI_ACLK )
-begin
-    if ( S_AXI_ARESETN == 1'b0 )
-    begin
+always @( posedge S_AXI_ACLK ) begin
+    if ( S_AXI_ARESETN == 1'b0 ) begin
         axi_awready <= 1'b0;
         axi_awv_awr_flag <= 1'b0;
     end
-    else
-    begin
-        if (~axi_awready && S_AXI_AWVALID && ~axi_awv_awr_flag && ~axi_arv_arr_flag)
-        begin
+    else begin
+        if (~axi_awready && S_AXI_AWVALID && ~axi_awv_awr_flag && ~axi_arv_arr_flag) begin
             // slave is ready to accept an address and
             // associated control signals
             axi_awready <= 1'b1;
@@ -268,8 +264,7 @@ begin
         begin
             axi_awv_awr_flag  <= 1'b0;
         end
-        else
-        begin
+        else begin
             axi_awready <= 1'b0;
         end
     end
@@ -279,19 +274,15 @@ end
 // This process is used to latch the address when both
 // S_AXI_AWVALID and S_AXI_WVALID are valid.
 
-always @( posedge S_AXI_ACLK )
-begin
-    if ( S_AXI_ARESETN == 1'b0 )
-    begin
+always @( posedge S_AXI_ACLK ) begin
+    if ( S_AXI_ARESETN == 1'b0 ) begin
         axi_awaddr <= 0;
         axi_awlen_cntr <= 0;
         axi_awburst <= 0;
         axi_awlen <= 0;
     end
-    else
-    begin
-        if (~axi_awready && S_AXI_AWVALID && ~axi_awv_awr_flag)
-        begin
+    else begin
+        if (~axi_awready && S_AXI_AWVALID && ~axi_awv_awr_flag) begin
             // address latching
             axi_awaddr <= S_AXI_AWADDR[C_S_AXI_ADDR_WIDTH - 1:0];
             axi_awburst <= S_AXI_AWBURST;
@@ -299,8 +290,7 @@ begin
             // start address of transfer
             axi_awlen_cntr <= 0;
         end
-        else if((axi_awlen_cntr <= axi_awlen) && axi_wready && S_AXI_WVALID)
-        begin
+        else if((axi_awlen_cntr <= axi_awlen) && axi_wready && S_AXI_WVALID) begin
 
             axi_awlen_cntr <= axi_awlen_cntr + 1;
 
@@ -321,12 +311,10 @@ begin
                 end
                 2'b10: //Wrapping burst
                     // The write address wraps when the address reaches wrap boundary
-                    if (aw_wrap_en)
-                    begin
+                    if (aw_wrap_en) begin
                         axi_awaddr <= (axi_awaddr - aw_wrap_size);
                     end
-                    else
-                    begin
+                    else begin
                         axi_awaddr[C_S_AXI_ADDR_WIDTH - 1:ADDR_LSB] <= axi_awaddr[C_S_AXI_ADDR_WIDTH - 1:ADDR_LSB] + 1;
                         axi_awaddr[ADDR_LSB-1:0]  <= {ADDR_LSB{1'b0}};
                     end
@@ -345,22 +333,17 @@ end
 // S_AXI_AWVALID and S_AXI_WVALID are asserted. axi_wready is
 // de-asserted when reset is low.
 
-always @( posedge S_AXI_ACLK )
-begin
-    if ( S_AXI_ARESETN == 1'b0 )
-    begin
+always @( posedge S_AXI_ACLK ) begin
+    if ( S_AXI_ARESETN == 1'b0 ) begin
         axi_wready <= 1'b0;
     end
-    else
-    begin
-        if ( ~axi_wready && S_AXI_WVALID && axi_awv_awr_flag)
-        begin
+    else begin
+        if ( ~axi_wready && S_AXI_WVALID && axi_awv_awr_flag) begin
             // slave can accept the write data
             axi_wready <= 1'b1;
         end
         //else if (~axi_awv_awr_flag)
-        else if (S_AXI_WLAST && axi_wready)
-        begin
+        else if (S_AXI_WLAST && axi_wready) begin
             axi_wready <= 1'b0;
         end
     end
@@ -372,24 +355,19 @@ end
 // This marks the acceptance of address and indicates the status of
 // write transaction.
 
-always @( posedge S_AXI_ACLK )
-begin
-    if ( S_AXI_ARESETN == 1'b0 )
-    begin
+always @( posedge S_AXI_ACLK ) begin
+    if ( S_AXI_ARESETN == 1'b0 ) begin
         axi_bvalid <= 0;
         axi_bresp <= 2'b0;
         axi_buser <= 0;
     end
-    else
-    begin
-        if (axi_awv_awr_flag && axi_wready && S_AXI_WVALID && ~axi_bvalid && S_AXI_WLAST )
-        begin
+    else begin
+        if (axi_awv_awr_flag && axi_wready && S_AXI_WVALID && ~axi_bvalid && S_AXI_WLAST ) begin
             axi_bvalid <= 1'b1;
             axi_bresp  <= 2'b0;
             // 'OKAY' response
         end
-        else
-        begin
+        else begin
             if (S_AXI_BREADY && axi_bvalid)
                 //check if bready is asserted while bvalid is high)
                 //(there is a possibility that bready is always asserted high)
@@ -407,17 +385,13 @@ end
 // The read address is also latched when S_AXI_ARVALID is
 // asserted. axi_araddr is reset to zero on reset assertion.
 
-always @( posedge S_AXI_ACLK )
-begin
-    if ( S_AXI_ARESETN == 1'b0 )
-    begin
+always @( posedge S_AXI_ACLK ) begin
+    if ( S_AXI_ARESETN == 1'b0 ) begin
         axi_arready <= 1'b0;
         axi_arv_arr_flag <= 1'b0;
     end
-    else
-    begin
-        if (~axi_arready && S_AXI_ARVALID && ~axi_awv_awr_flag && ~axi_arv_arr_flag)
-        begin
+    else begin
+        if (~axi_arready && S_AXI_ARVALID && ~axi_awv_awr_flag && ~axi_arv_arr_flag) begin
             axi_arready <= 1'b1;
             axi_arv_arr_flag <= 1'b1;
         end
@@ -426,8 +400,7 @@ begin
         begin
             axi_arv_arr_flag  <= 1'b0;
         end
-        else
-        begin
+        else begin
             axi_arready <= 1'b0;
         end
     end
@@ -436,10 +409,8 @@ end
 
 //This process is used to latch the address when both
 //S_AXI_ARVALID and S_AXI_RVALID are valid.
-always @( posedge S_AXI_ACLK )
-begin
-    if ( S_AXI_ARESETN == 1'b0 )
-    begin
+always @( posedge S_AXI_ACLK ) begin
+    if ( S_AXI_ARESETN == 1'b0 ) begin
         axi_araddr <= 0;
         axi_arlen_cntr <= 0;
         axi_arburst <= 0;
@@ -447,10 +418,8 @@ begin
         axi_rlast <= 1'b0;
         axi_ruser <= 0;
     end
-    else
-    begin
-        if (~axi_arready && S_AXI_ARVALID && ~axi_arv_arr_flag)
-        begin
+    else begin
+        if (~axi_arready && S_AXI_ARVALID && ~axi_arv_arr_flag) begin
             // address latching
             axi_araddr <= S_AXI_ARADDR[C_S_AXI_ADDR_WIDTH - 1:0];
             axi_arburst <= S_AXI_ARBURST;
@@ -459,8 +428,7 @@ begin
             axi_arlen_cntr <= 0;
             axi_rlast <= 1'b0;
         end
-        else if((axi_arlen_cntr <= axi_arlen) && axi_rvalid && S_AXI_RREADY)
-        begin
+        else if((axi_arlen_cntr <= axi_arlen) && axi_rvalid && S_AXI_RREADY) begin
 
             axi_arlen_cntr <= axi_arlen_cntr + 1;
             axi_rlast <= 1'b0;
@@ -482,12 +450,10 @@ begin
                 end
                 2'b10: //Wrapping burst
                     // The read address wraps when the address reaches wrap boundary
-                    if (ar_wrap_en)
-                    begin
+                    if (ar_wrap_en) begin
                         axi_araddr <= (axi_araddr - ar_wrap_size);
                     end
-                    else
-                    begin
+                    else begin
                         axi_araddr[C_S_AXI_ADDR_WIDTH - 1:ADDR_LSB] <= axi_araddr[C_S_AXI_ADDR_WIDTH - 1:ADDR_LSB] + 1;
                         //araddr aligned to 4 byte boundary
                         axi_araddr[ADDR_LSB-1:0]  <= {ADDR_LSB{1'b0}};
@@ -499,12 +465,10 @@ begin
                 end
             endcase
         end
-        else if((axi_arlen_cntr == axi_arlen) && ~axi_rlast && axi_arv_arr_flag )
-        begin
+        else if((axi_arlen_cntr == axi_arlen) && ~axi_rlast && axi_arv_arr_flag ) begin
             axi_rlast <= 1'b1;
         end
-        else if (S_AXI_RREADY)
-        begin
+        else if (S_AXI_RREADY) begin
             axi_rlast <= 1'b0;
         end
     end
@@ -519,23 +483,18 @@ end
 // is deasserted on reset (active low). axi_rresp and axi_rdata are
 // cleared to zero on reset (active low).
 
-always @( posedge S_AXI_ACLK )
-begin
-    if ( S_AXI_ARESETN == 1'b0 )
-    begin
+always @( posedge S_AXI_ACLK ) begin
+    if ( S_AXI_ARESETN == 1'b0 ) begin
         axi_rvalid <= 0;
         axi_rresp  <= 0;
     end
-    else
-    begin
-        if (axi_arv_arr_flag && ~axi_rvalid)
-        begin
+    else begin
+        if (axi_arv_arr_flag && ~axi_rvalid) begin
             axi_rvalid <= 1'b1;
             axi_rresp  <= 2'b0;
             // 'OKAY' response
         end
-        else if (axi_rvalid && S_AXI_RREADY)
-        begin
+        else if (axi_rvalid && S_AXI_RREADY) begin
             axi_rvalid <= 1'b0;
         end
     end
@@ -544,72 +503,115 @@ end
 // -- Example code to access user logic memory region
 // ------------------------------------------
 
-generate
-    if (USER_NUM_MEM >= 1)
-    begin
-        assign mem_select  = 1;
-        assign mem_address = (axi_arv_arr_flag? axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB]:(axi_awv_awr_flag? axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB]:0));
+reg[31:0] slv_reg0;
+reg[31:0] reg_data_out;
+
+wire rst_n;
+wire reg_write_en;
+wire reg_read_en;
+
+wire dat_addr_vaild;
+wire dat_vaild_i;
+wire [31:0] dat_lsb_i;
+wire [31:0] hash[7:0];
+wire [31:0] slv_reg0_nxt;
+wire hash_busy_o;
+wire irq_finish;
+
+assign rst_n = S_AXI_ARESETN & (~slv_reg0[0]);
+assign reg_write_en = axi_wready && S_AXI_WVALID;
+assign reg_read_en = axi_arv_arr_flag;
+
+// data address from 0x10 ~ 0x1f
+assign dat_addr_vaild = axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB+4] == 2'h1;
+assign dat_vaild_i = reg_write_en & dat_addr_vaild;
+assign dat_lsb_i = S_AXI_WDATA[31:0];
+assign irq_hash_finish = slv_reg0[1] & irq_finish;
+assign slv_reg0_nxt = {16'h0, 7'h0, hash_busy_o, 6'h0, slv_reg0[1], 1'b0};
+
+integer byte_index;
+always @(posedge S_AXI_ACLK) begin
+    if(!S_AXI_ARESETN) begin
+        slv_reg0 <= 32'h0;
     end
-endgenerate
-
-// implement Block RAM(s)
-generate
-    for(i=0; i<= USER_NUM_MEM-1; i=i+1)
-    begin:BRAM_GEN
-        wire mem_rden;
-        wire mem_wren;
-
-        assign mem_wren = axi_wready && S_AXI_WVALID ;
-
-        assign mem_rden = axi_arv_arr_flag ; //& ~axi_rvalid
-
-        for(mem_byte_index=0; mem_byte_index<= (C_S_AXI_DATA_WIDTH/8-1); mem_byte_index=mem_byte_index+1)
-        begin:BYTE_BRAM_GEN
-            wire [8-1:0] data_in ;
-            wire [8-1:0] data_out;
-            reg  [8-1:0] byte_ram [0 : 63];
-            integer  j;
-
-            //assigning 8 bit data
-            assign data_in  = S_AXI_WDATA[(mem_byte_index*8+7) -: 8];
-            assign data_out = byte_ram[mem_address];
-
-            always @( posedge S_AXI_ACLK )
-            begin
-                if (mem_wren && S_AXI_WSTRB[mem_byte_index])
-                begin
-                    byte_ram[mem_address] <= data_in;
+    else begin
+        if(reg_write_en) begin
+            case (axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB])
+                6'h00: begin
+                    for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
+                        if ( S_AXI_WSTRB[byte_index] == 1 ) begin
+                            slv_reg0[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
+                        end
                 end
-            end
-
-            always @( posedge S_AXI_ACLK )
-            begin
-                if (mem_rden)
-                begin
-                    mem_data_out[i][(mem_byte_index*8+7) -: 8] <= data_out;
-                end
-            end
-
+                default:
+                    slv_reg0 <= slv_reg0_nxt;
+            endcase
+        end
+        else begin
+            slv_reg0 <= slv_reg0_nxt;
         end
     end
-endgenerate
-//Output register or memory read data
+end
 
-always @(*)
-begin
-    if (axi_rvalid)
-    begin
-        // Read address mux
-        axi_rdata <= mem_data_out[0];
+always @(posedge S_AXI_ACLK) begin
+    if(!S_AXI_ARESETN) begin
+        reg_data_out <= 32'h0;
     end
-    else
-    begin
+    else begin
+        if (reg_read_en) begin
+            case (axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB])
+                6'h00:
+                    reg_data_out <= slv_reg0;
+                6'h08:
+                    reg_data_out <= hash[0];
+                6'h09:
+                    reg_data_out <= hash[1];
+                6'h0a:
+                    reg_data_out <= hash[2];
+                6'h0b:
+                    reg_data_out <= hash[3];
+                6'h0c:
+                    reg_data_out <= hash[4];
+                6'h0d:
+                    reg_data_out <= hash[5];
+                6'h0e:
+                    reg_data_out <= hash[6];
+                6'h0f:
+                    reg_data_out <= hash[7];
+                default:
+                    reg_data_out <= 32'h00000000;
+            endcase
+        end
+    end
+end
+
+always @(*) begin
+    if (axi_rvalid) begin
+        // Read address mux
+        axi_rdata <= reg_data_out;
+    end
+    else begin
         axi_rdata <= 32'h00000000;
     end
 end
 
 // Add user logic here
-
+sha256 sha256_inst(
+           .clk(S_AXI_ACLK),
+           .rst_n(rst_n),
+           .dat_vaild_i(dat_vaild_i),
+           .dat_lsb_i(dat_lsb_i),
+           .hash0(hash[0]),
+           .hash1(hash[1]),
+           .hash2(hash[2]),
+           .hash3(hash[3]),
+           .hash4(hash[4]),
+           .hash5(hash[5]),
+           .hash6(hash[6]),
+           .hash7(hash[7]),
+           .hash_busy_o(hash_busy_o),
+           .irq_finish(irq_finish)
+       );
 // User logic ends
 
 endmodule

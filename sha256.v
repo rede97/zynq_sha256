@@ -121,39 +121,39 @@ end
 
 always@(*) begin
     if(!rst_n) begin
-        state_next = IDLE;
+        state_next <= IDLE;
     end
     else begin
         case(state)
             default: begin
-                state_next = IDLE;
+                state_next <= IDLE;
             end
             IDLE: begin
                 if(dat_vaild_i) begin
-                    state_next = LOAD;
+                    state_next <= LOAD;
                 end
                 else begin
-                    state_next = state;
+                    state_next <= state;
                 end
             end
             LOAD: begin
                 if(counter == 8'h10) begin
-                    state_next = PROC;
+                    state_next <= PROC;
                 end
                 else begin
-                    state_next = state;
+                    state_next <= state;
                 end
             end
             PROC: begin
                 if(counter == 8'h50) begin
-                    state_next = FINISH;
+                    state_next <= FINISH;
                 end
                 else begin
-                    state_next = state;
+                    state_next <= state;
                 end
             end
             FINISH: begin
-                state_next = IDLE;
+                state_next <= IDLE;
             end
         endcase
     end

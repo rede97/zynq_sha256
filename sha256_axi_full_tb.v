@@ -68,6 +68,8 @@ reg axi_rready;
 // user
 wire [-1:0] void_user;
 
+wire irq_hash_finish;
+
 initial begin
     #0 aclk = 0;
     forever
@@ -161,7 +163,9 @@ sha256_full_v1_0 #(
                      .s00_axi_wready(axi_wready),
                      .s00_axi_wstrb(axi_wstrb),
                      .s00_axi_wvalid(axi_wvaild),
-                     .s00_axi_wuser(void_user)
+                     .s00_axi_wuser(void_user),
+                     // irq
+                     .irq_hash_finish(irq_hash_finish)
                  );
 
 localparam BURST_FIXED = 2'b00,
@@ -262,7 +266,7 @@ task axi_write;
     input [1:0] burst;
     integer addr_cnt;
     begin
-        axi_awaddr = waddr;
+        axi_awaddr = {waddr, 2'b00};
         axi_awlen = wlen - 1;
         axi_awbrust = burst;
         axi_awsize = 3'b010;
@@ -310,18 +314,67 @@ task axi_write;
     end
 endtask
 
+task dump_sha256_result;
+    begin
+        $display("[%m]#%t SHA256: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", $time,
+                 axi_buffer[0][7:0], axi_buffer[0][15:8], axi_buffer[0][23:16], axi_buffer[0][31:24],
+                 axi_buffer[1][7:0], axi_buffer[1][15:8], axi_buffer[1][23:16], axi_buffer[1][31:24],
+                 axi_buffer[2][7:0], axi_buffer[2][15:8], axi_buffer[2][23:16], axi_buffer[2][31:24],
+                 axi_buffer[3][7:0], axi_buffer[3][15:8], axi_buffer[3][23:16], axi_buffer[3][31:24],
+                 axi_buffer[4][7:0], axi_buffer[4][15:8], axi_buffer[4][23:16], axi_buffer[4][31:24],
+                 axi_buffer[5][7:0], axi_buffer[5][15:8], axi_buffer[5][23:16], axi_buffer[5][31:24],
+                 axi_buffer[6][7:0], axi_buffer[6][15:8], axi_buffer[6][23:16], axi_buffer[6][31:24],
+                 axi_buffer[7][7:0], axi_buffer[7][15:8], axi_buffer[7][23:16], axi_buffer[7][31:24]);
+    end
+endtask
+
 
 initial begin
     aresetn = 1'b0;
     repeat(5) @(posedge aclk);
     aresetn = 1'b1;
-    axi_buffer[0] = 32'h0badbeaf;
-    axi_buffer[1] = 32'h1badbeaf;
-    axi_buffer[2] = 32'h2badbeaf;
-    axi_buffer[3] = 32'h3badbeaf;
-    axi_write(0, 4, BURST_INC);
-    axi_wait(4);
-    axi_read(0, 4, BURST_INC);
+    axi_buffer[0] = 32'h03;
+    axi_write(0, 1, BURST_INC);
+    axi_buffer[0] = 32'h64343962;
+    axi_buffer[1] = 32'h39623732;
+    axi_buffer[2] = 32'h64343339;
+    axi_buffer[3] = 32'h38306533;
+    axi_buffer[4] = 32'h65323561;
+    axi_buffer[5] = 32'h37643235;
+    axi_buffer[6] = 32'h64376164;
+    axi_buffer[7] = 32'h61666261;
+    axi_buffer[8] = 32'h34383463;
+    axi_buffer[9] = 32'h33656665;
+    axi_buffer[10] = 32'h33356137;
+    axi_buffer[11] = 32'h65653038;
+    axi_buffer[12] = 32'h38383039;
+    axi_buffer[13] = 32'h63613766;
+    axi_buffer[14] = 32'h66653265;
+    axi_buffer[15] = 32'h39656463;
+    axi_write(16, 16, BURST_INC);
+
+    @(posedge irq_hash_finish);
+    axi_buffer[0] = 32'h00000080;
+    axi_buffer[1] = 32'h00000000;
+    axi_buffer[2] = 32'h00000000;
+    axi_buffer[3] = 32'h00000000;
+    axi_buffer[4] = 32'h00000000;
+    axi_buffer[5] = 32'h00000000;
+    axi_buffer[6] = 32'h00000000;
+    axi_buffer[7] = 32'h00000000;
+    axi_buffer[8] = 32'h00000000;
+    axi_buffer[9] = 32'h00000000;
+    axi_buffer[10] = 32'h00000000;
+    axi_buffer[11] = 32'h00000000;
+    axi_buffer[12] = 32'h00000000;
+    axi_buffer[13] = 32'h00000000;
+    axi_buffer[14] = 32'h00000000;
+    axi_buffer[15] = 32'h00020000;
+    axi_write(16, 16, BURST_INC);
+    @(posedge irq_hash_finish);
+    axi_read(8, 8, BURST_INC);
+    dump_sha256_result();
+    $display("expect: 049da052634feb56ce6ec0bc648c672011edff1cb272b53113bbc90a8f00249c");
     axi_wait(4);
     $finish;
 end
