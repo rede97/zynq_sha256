@@ -23,17 +23,23 @@
 module sha256_chunk_process(
            input clk,
            input rst_n,
-           input clear,
-           input proc_ninit,
+           input process_start,
            input dat_vaild_i,
            input[31:0] dat_msb_i,
            output[31:0] w_out
        );
 
 reg[31:0] W[15:0];
+reg[31:0] s0;
+reg[31:0] s1;
+
 wire[31:0] w_in;
 wire[31:0] w_new;
-wire enable;
+
+wire[31:0] s0_next;
+wire[31:0] s1_next;
+wire[31:0] W_next[15:0];
+wire pipeline_start;
 
 wire[31:0] w_m15;
 wire[31:0] w_m15_rr7;
@@ -45,59 +51,69 @@ wire[31:0] w_m2_rr19;
 wire[31:0] w_m2_r10;
 wire[31:0] w_m16;
 wire[31:0] w_m7;
-wire[31:0] s0;
-wire[31:0] s1;
 
-assign enable = dat_vaild_i | proc_ninit;
+assign pipeline_start = dat_vaild_i | process_start;
 
-assign w_m15 = W[1];
+assign w_m16 = W[0];
+
+assign w_m15 = W[1 + 1];
 assign w_m15_rr7 = {w_m15[6:0], w_m15[31:7]};
 assign w_m15_rr18 = {w_m15[17:0], w_m15[31:18]};
 assign w_m15_r3 = w_m15 >> 3;
 
-assign w_m2 = W[14];
+assign s0_next = pipeline_start ? w_m15_rr7 ^ w_m15_rr18 ^ w_m15_r3 : s0;
+
+always@(posedge clk or negedge rst_n) begin
+    if(!rst_n) begin
+        s0 <= 32'h0;
+    end
+    else begin
+        s0 <= s0_next;
+    end
+end
+
+assign w_m7 = W[9];
+
+assign w_m2 = W[15];
 assign w_m2_rr17 = {w_m2[16:0], w_m2[31:17]};
 assign w_m2_rr19 = {w_m2[18:0], w_m2[31:19]};
 assign w_m2_r10 = w_m2 >> 10;
 
-assign w_m16 = W[0];
-assign w_m7 = W[9];
-
-assign s0 = w_m15_rr7 ^ w_m15_rr18 ^ w_m15_r3;
-assign s1 = w_m2_rr17 ^ w_m2_rr19 ^ w_m2_r10;
-assign w_new = w_m16 + s0 + w_m7 + s1;
-
-assign w_in = proc_ninit ? w_new : dat_msb_i;
-assign w_out = W[0];
-
-
+assign s1_next = pipeline_start ? w_m2_rr17 ^ w_m2_rr19 ^ w_m2_r10 : s1;
 
 always@(posedge clk or negedge rst_n) begin
-    if(rst_n == 1'b0 | clear) begin
+    if(!rst_n) begin
+        s1 <= 32'h0;
+    end
+    else begin
+        s1 <= s1_next;
+    end
+end
+
+assign w_new = (w_m16 + s0) + (w_m7 + s1);
+
+assign w_in = process_start ? w_new : dat_msb_i;
+assign w_out = W[0];
+
+assign W_next[15] = pipeline_start ? w_in : W[15];
+always@(posedge clk or negedge rst_n) begin
+    if(!rst_n) begin
         W[15] <= 32'h0;
     end
     else begin
-        if(enable) begin
-            W[15] <= w_in;
-            $display("[%m]#%t INFO: Load: 0x%08x", $time, w_in);
-        end else begin
-            W[15] <= W[15];
-        end
+        W[15] <= W_next[15];
     end
 end
 
 generate genvar i;
     for(i = 0; i < 15; i = i + 1) begin: chunk_proc_pipeline
+        assign W_next[i] = pipeline_start ? W[i + 1] : W[i];
         always@(posedge clk or negedge rst_n) begin
-            if(rst_n == 1'b0 | clear) begin
+            if(!rst_n) begin
                 W[i] <= 32'h0;
             end
             else begin
-                if(enable) begin
-                    W[i] <= W[i + 1];
-                end else begin
-                    W[i] <= W[i];
-                end
+                W[i] <= W_next[i];
             end
         end
     end
