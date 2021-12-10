@@ -208,18 +208,10 @@ reg [7:0] axi_awlen;
 
 localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32)+ 1;
 localparam integer OPT_MEM_ADDR_BITS = 5;
-localparam integer USER_NUM_MEM = 1;
 //----------------------------------------------
 //-- Signals for user logic memory space example
 //------------------------------------------------
-wire [OPT_MEM_ADDR_BITS:0] mem_address;
-wire [USER_NUM_MEM-1:0] mem_select;
-reg [C_S_AXI_DATA_WIDTH-1:0] mem_data_out[0 : USER_NUM_MEM-1];
-
-genvar i;
-genvar j;
-genvar mem_byte_index;
-
+wire block_data_input;
 // I/O Connections assignments
 
 assign S_AXI_AWREADY	= axi_awready;
@@ -338,7 +330,7 @@ always @( posedge S_AXI_ACLK ) begin
         axi_wready <= 1'b0;
     end
     else begin
-        if ( ~axi_wready && S_AXI_WVALID && axi_awv_awr_flag) begin
+        if ( ~axi_wready && S_AXI_WVALID && axi_awv_awr_flag && (~block_data_input)) begin
             // slave can accept the write data
             axi_wready <= 1'b1;
         end
@@ -524,6 +516,7 @@ assign reg_read_en = axi_arv_arr_flag;
 
 // data address from 0x10 ~ 0x1f
 assign dat_addr_vaild = axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB+4] == 2'h1;
+assign block_data_input = hash_busy_o && dat_addr_vaild;
 assign dat_vaild_i = reg_write_en & dat_addr_vaild;
 assign dat_lsb_i = S_AXI_WDATA[31:0];
 assign irq_hash_finish = slv_reg0[1] & irq_finish;

@@ -89,7 +89,7 @@ task axil_read;
     begin
         s_axi_araddr = {addr, 2'b00};
         temp_addr = s_axi_araddr;
-        $display("[%m]#%t INFO: Read Addr: 0x%08x", $time, temp_addr);
+        // $display("[%m]#%t INFO: Read Addr: 0x%08x", $time, temp_addr);
         s_axi_arvalid = 1;
         s_axi_rready = 1;
         repeat(4)
@@ -103,7 +103,7 @@ task axil_read;
                 s_axi_rready = 0;
                 if(s_axi_rvalid)
                 begin
-                    $display("[%m]#%t INFO: Read Value: 0x%08x @ 0x%08x -> [resp: %d]", $time, s_axi_rdata, temp_addr, s_axi_rresp);
+                    // $display("[%m]#%t INFO: Read Value: 0x%08x @ 0x%08x -> [resp: %d]", $time, s_axi_rdata, temp_addr, s_axi_rresp);
                     value = s_axi_rdata;
                 end
                 else
@@ -140,7 +140,7 @@ task axil_write;
         s_axi_awvalid = 1;
         s_axi_awaddr = {addr, 2'b00};
         temp_addr = s_axi_awaddr;
-        $display("[%m]#%t INFO: Write Data: 0x%08x to 0x%08x", $time, data, temp_addr);
+        // $display("[%m]#%t INFO: Write Data: 0x%08x to 0x%08x", $time, data, temp_addr);
 
         s_axi_wvalid = 1;
         s_axi_wdata = data;
@@ -169,7 +169,7 @@ task axil_write;
                 s_axi_bready = 0;
                 if(s_axi_bvalid)
                 begin
-                    $display("[%m]#%t INFO: Write Data: 0x%08x => 0x%08x -> [resp: %d]", $time, data, temp_addr, s_axi_bresp);
+                    // $display("[%m]#%t INFO: Write Data: 0x%08x => 0x%08x -> [resp: %d]", $time, data, temp_addr, s_axi_bresp);
                 end
                 else
                 begin

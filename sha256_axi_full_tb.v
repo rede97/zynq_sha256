@@ -353,7 +353,7 @@ initial begin
     axi_buffer[15] = 32'h39656463;
     axi_write(16, 16, BURST_INC);
 
-    @(posedge irq_hash_finish);
+    // @(posedge irq_hash_finish);
     axi_buffer[0] = 32'h00000080;
     axi_buffer[1] = 32'h00000000;
     axi_buffer[2] = 32'h00000000;
