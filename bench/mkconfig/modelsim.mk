@@ -56,14 +56,12 @@ LIB_SV_STD = $(MODELSIM_DIR)/sv_std
 LIB_WORK = work
 LIB_TEST = test
 
-WORK_OBJECTS = $(shell echo $(WORK_SOURCES) | sed 's:$(WORK_DIR)/:./$(LIB_WORK)/:g' | sed 's:\.v:/_primary.dat:g')
-TEST_OBJECTS = $(shell echo $(TEST_SOURCES) | sed 's:$(TEST_DIR)/:./$(LIB_TEST)/:g' | sed 's:\.v:/_primary.dat:g')
-
 CLI_STARTUP_FILE = ./tcl/cli_startup.do
 
-work_library: $(LIB_WORK) $(WORK_OBJECTS)
+work_library: $(LIB_WORK) work_objects
 
-$(WORK_OBJECTS): $(WORK_SOURCES)
+work_objects: $(WORK_SOURCES)
+	$(V)echo "compile $? ..."
 	$(V)$(VLOG) -work $(LIB_WORK) +incdir+$(WORK_DIR) -nocovercells -O0 $?
 	
 $(LIB_WORK) :
@@ -71,9 +69,10 @@ $(LIB_WORK) :
 	$(V)$(VLIB) $(LIB_WORK)
 	$(V)$(VMAP) $(LIB_WORK) $(LIB_WORK)
 
-test_library: $(LIB_TEST) $(TEST_OBJECTS)
+test_library: $(LIB_TEST) test_objects
 
-$(TEST_OBJECTS): $(TEST_SOURCES)
+test_objects: $(TEST_SOURCES)
+	$(V)echo "compile $? ..."
 	$(V)$(VLOG) -work $(LIB_TEST) +incdir+$(WORK_DIR) +incdir+$(TEST_DIR) -nocovercells -O4 $?
 
 $(LIB_TEST) : 
@@ -90,12 +89,6 @@ compile: work_library test_library
 	-$(V)mv -f transcript $(LOG_DIR);
 
 simulate: $(TESTBENCHES)
-
-print_work_objects:
-	$(V)@echo $(WORK_OBJECTS)
-
-print_test_objects:
-	$(V)@echo $(TEST_OBJECTS)
 
 sim_clean:
 	$(V)rm -rfv $(LIB_WORK)
