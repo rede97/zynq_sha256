@@ -56,8 +56,8 @@ LIB_SV_STD = $(MODELSIM_DIR)/sv_std
 LIB_WORK = work
 LIB_TEST = test
 
-WORK_OBJECTS = $(shell echo $(WORK_SOURCES) | sed 's:$(WORK_DIR):./$(LIB_WORK):g' | sed 's:\.v:/_primary.dat:g')
-TEST_OBJECTS = $(shell echo $(TEST_SOURCES) | sed 's:$(TEST_DIR):./$(LIB_TEST):g' | sed 's:\.sv:/_primary.dat:g')
+WORK_OBJECTS = $(shell echo $(WORK_SOURCES) | sed 's:$(WORK_DIR)/:./$(LIB_WORK)/:g' | sed 's:\.v:/_primary.dat:g')
+TEST_OBJECTS = $(shell echo $(TEST_SOURCES) | sed 's:$(TEST_DIR)/:./$(LIB_TEST)/:g' | sed 's:\.v:/_primary.dat:g')
 
 CLI_STARTUP_FILE = ./tcl/cli_startup.do
 
@@ -93,6 +93,9 @@ simulate: $(TESTBENCHES)
 
 print_work_objects:
 	$(V)@echo $(WORK_OBJECTS)
+
+print_test_objects:
+	$(V)@echo $(TEST_OBJECTS)
 
 sim_clean:
 	$(V)rm -rfv $(LIB_WORK)
