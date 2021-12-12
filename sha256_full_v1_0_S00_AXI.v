@@ -215,7 +215,7 @@ wire block_data_input;
 // I/O Connections assignments
 
 assign S_AXI_AWREADY	= axi_awready;
-assign S_AXI_WREADY	= axi_wready;
+assign S_AXI_WREADY	= axi_wready & (~block_data_input);
 assign S_AXI_BRESP	= axi_bresp;
 assign S_AXI_BUSER	= axi_buser;
 assign S_AXI_BVALID	= axi_bvalid;
@@ -251,7 +251,7 @@ always @( posedge S_AXI_ACLK ) begin
             axi_awv_awr_flag  <= 1'b1;
             // used for generation of bresp() and bvalid
         end
-        else if (S_AXI_WLAST && axi_wready)
+        else if (S_AXI_WLAST && S_AXI_WREADY)
             // preparing to accept next address after current write burst tx completion
         begin
             axi_awv_awr_flag  <= 1'b0;
@@ -282,7 +282,7 @@ always @( posedge S_AXI_ACLK ) begin
             // start address of transfer
             axi_awlen_cntr <= 0;
         end
-        else if((axi_awlen_cntr <= axi_awlen) && axi_wready && S_AXI_WVALID) begin
+        else if((axi_awlen_cntr <= axi_awlen) && S_AXI_WREADY && S_AXI_WVALID) begin
 
             axi_awlen_cntr <= axi_awlen_cntr + 1;
 
@@ -330,7 +330,7 @@ always @( posedge S_AXI_ACLK ) begin
         axi_wready <= 1'b0;
     end
     else begin
-        if ( ~axi_wready && S_AXI_WVALID && axi_awv_awr_flag && (~block_data_input)) begin
+        if ( ~axi_wready && S_AXI_WVALID && axi_awv_awr_flag) begin
             // slave can accept the write data
             axi_wready <= 1'b1;
         end
@@ -343,7 +343,7 @@ end
 // Implement write response logic generation
 
 // The write response and response valid signals are asserted by the slave
-// when axi_wready, S_AXI_WVALID, axi_wready and S_AXI_WVALID are asserted.
+// when S_AXI_WREADY, S_AXI_WVALID, S_AXI_WREADY and S_AXI_WVALID are asserted.
 // This marks the acceptance of address and indicates the status of
 // write transaction.
 
@@ -354,7 +354,7 @@ always @( posedge S_AXI_ACLK ) begin
         axi_buser <= 0;
     end
     else begin
-        if (axi_awv_awr_flag && axi_wready && S_AXI_WVALID && ~axi_bvalid && S_AXI_WLAST ) begin
+        if (axi_awv_awr_flag && S_AXI_WREADY && S_AXI_WVALID && ~axi_bvalid && S_AXI_WLAST ) begin
             axi_bvalid <= 1'b1;
             axi_bresp  <= 2'b0;
             // 'OKAY' response
@@ -511,7 +511,7 @@ wire hash_busy_o;
 wire irq_finish;
 
 assign rst_n = S_AXI_ARESETN & (~slv_reg0[0]);
-assign reg_write_en = axi_wready && S_AXI_WVALID;
+assign reg_write_en = S_AXI_WREADY && S_AXI_WVALID;
 assign reg_read_en = axi_arv_arr_flag;
 
 // data address from 0x10 ~ 0x1f

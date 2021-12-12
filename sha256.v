@@ -53,21 +53,24 @@ reg[7:0] counter;
 wire[7:0] counter_nxt;
 wire[31:0] dat_msb_i;
 wire[5:0] k_addr;
-wire counter_clr;
 wire[31:0] k_out;
 wire[31:0] w_out;
+wire next_state_is_idle;
 wire next_state_is_proc;
-wire compress_start;
-wire update_hash;
+wire next_state_is_finish;
+wire state_is_proc;
+wire state_is_finish;
 
 assign k_addr = counter[5:0] - 6'h10;
-assign update_hash = state_next == FINISH;
-assign hash_busy_o = state == PROC | state == FINISH;
-assign counter_clr = (~dat_vaild_i & (state == IDLE)) | state == FINISH;
+assign next_state_is_idle = state_next == IDLE;
 assign next_state_is_proc = state_next == PROC;
-assign compress_start = state == PROC;
+assign next_state_is_finish = state_next == FINISH;
+assign state_is_proc = state == PROC;
+assign state_is_finish = state == FINISH;
+
+assign hash_busy_o = next_state_is_proc | state_is_proc | state_is_finish;
 assign dat_msb_i = {dat_lsb_i[7:0], dat_lsb_i[15:8], dat_lsb_i[23:16], dat_lsb_i[31:24]};
-assign counter_nxt = counter_clr ? 8'h0: dat_vaild_i | next_state_is_proc ? counter + 8'h1 : counter;
+assign counter_nxt = next_state_is_idle ? 8'h0: dat_vaild_i | next_state_is_proc ? counter + 8'h1 : counter;
 
 always@(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
@@ -96,8 +99,8 @@ sha256_k sha256_k_u1(
 sha256_chunk_compress sha256_chunk_compress_u2(
                           .clk(clk),
                           .rst_n(rst_n),
-                          .compress_start(compress_start),
-                          .update_hash(update_hash),
+                          .compress_start(state_is_proc),
+                          .update_hash(next_state_is_finish),
                           .w_in(w_out),
                           .k_in(k_out),
                           .hash0(hash0),

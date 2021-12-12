@@ -82,7 +82,7 @@ module sha256_axi_v1_0_S00_AXI #
            input wire  S_AXI_RREADY
        );
 
-wire rst_n;
+wire sha256_rst_n;
 wire dat_addr_vaild;
 wire dat_vaild_i;
 wire [31:0] dat_lsb_i;
@@ -117,7 +117,7 @@ reg  	axi_rvalid;
 // ADDR_LSB = 2 for 32 bits (n downto 2)
 // ADDR_LSB = 3 for 64 bits (n downto 3)
 localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32) + 1;
-localparam integer OPT_MEM_ADDR_BITS = 6 - 1;
+localparam integer OPT_MEM_ADDR_BITS = C_S_AXI_ADDR_WIDTH - ADDR_LSB - 1;
 //----------------------------------------------
 //-- Signals for user logic register space example
 //------------------------------------------------
@@ -222,9 +222,9 @@ assign slv_reg_wren = axi_wready && S_AXI_WVALID && axi_awready && S_AXI_AWVALID
 always @( posedge S_AXI_ACLK ) begin
     if ( S_AXI_ARESETN == 1'b0 ) begin
         slv_reg0 <= 0;
-        slv_reg1 <= 0;
-        slv_reg2 <= 0;
-        slv_reg3 <= 0;
+        // slv_reg1 <= 0;
+        // slv_reg2 <= 0;
+        // slv_reg3 <= 0;
     end
     else begin
         if (slv_reg_wren) begin
@@ -236,39 +236,40 @@ always @( posedge S_AXI_ACLK ) begin
                             // Slave register 0
                             slv_reg0[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
                         end
-                6'h01:
-                    for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
-                        if ( S_AXI_WSTRB[byte_index] == 1 ) begin
-                            // Respective byte enables are asserted as per write strobes
-                            // Slave register 1
-                            slv_reg1[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
-                        end
-                6'h02:
-                    for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
-                        if ( S_AXI_WSTRB[byte_index] == 1 ) begin
-                            // Respective byte enables are asserted as per write strobes
-                            // Slave register 2
-                            slv_reg2[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
-                        end
-                6'h03:
-                    for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
-                        if ( S_AXI_WSTRB[byte_index] == 1 ) begin
-                            // Respective byte enables are asserted as per write strobes
-                            // Slave register 3
-                            slv_reg3[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
-                        end
+                // 6'h01:
+                //     for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
+                //         if ( S_AXI_WSTRB[byte_index] == 1 ) begin
+                //             // Respective byte enables are asserted as per write strobes
+                //             // Slave register 1
+                //             slv_reg1[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
+                //         end
+                // 6'h02:
+                //     for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
+                //         if ( S_AXI_WSTRB[byte_index] == 1 ) begin
+                //             // Respective byte enables are asserted as per write strobes
+                //             // Slave register 2
+                //             slv_reg2[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
+                //         end
+                // 6'h03:
+                //     for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
+                //         if ( S_AXI_WSTRB[byte_index] == 1 ) begin
+                //             // Respective byte enables are asserted as per write strobes
+                //             // Slave register 3
+                //             slv_reg3[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
+                //         end
                 default : begin
                     slv_reg0 <= slv_reg0_nxt;
-                    slv_reg1 <= slv_reg1;
-                    slv_reg2 <= slv_reg2;
-                    slv_reg3 <= slv_reg3;
+                    // slv_reg1 <= slv_reg1;
+                    // slv_reg2 <= slv_reg2;
+                    // slv_reg3 <= slv_reg3;
                 end
             endcase
-        end else begin
+        end
+        else begin
             slv_reg0 <= slv_reg0_nxt;
-            slv_reg1 <= slv_reg1;
-            slv_reg2 <= slv_reg2;
-            slv_reg3 <= slv_reg3;
+            // slv_reg1 <= slv_reg1;
+            // slv_reg2 <= slv_reg2;
+            // slv_reg3 <= slv_reg3;
         end
     end
 end
@@ -361,12 +362,12 @@ always @(*) begin
     case ( axi_araddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB] )
         6'h00:
             reg_data_out <= slv_reg0;
-        6'h01:
-            reg_data_out <= slv_reg1;
-        6'h02:
-            reg_data_out <= slv_reg2;
-        6'h03:
-            reg_data_out <= slv_reg3;
+        // 6'h01:
+        //     reg_data_out <= slv_reg1;
+        // 6'h02:
+        //     reg_data_out <= slv_reg2;
+        // 6'h03:
+        //     reg_data_out <= slv_reg3;
         6'h08:
             reg_data_out <= hash0;
         6'h09:
@@ -405,7 +406,7 @@ end
 
 // Add user logic here
 
-assign rst_n = S_AXI_ARESETN & (~slv_reg0[0]);
+assign sha256_rst_n = S_AXI_ARESETN & (~slv_reg0[0]);
 assign dat_addr_vaild = axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB+4] == 2'h1;
 assign dat_vaild_i = slv_reg_wren & dat_addr_vaild;
 assign dat_lsb_i = S_AXI_WDATA[31:0];
@@ -415,7 +416,7 @@ assign slv_reg0_nxt = {16'h0, 7'h0, hash_busy_o, 6'h0, slv_reg0[1], 1'b0};
 
 sha256 sha256_inst(
            .clk(S_AXI_ACLK),
-           .rst_n(rst_n),
+           .rst_n(sha256_rst_n),
            .dat_vaild_i(dat_vaild_i),
            .dat_lsb_i(dat_lsb_i),
            .hash0(hash0),
