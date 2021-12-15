@@ -208,22 +208,14 @@ reg [7:0] axi_awlen;
 
 localparam integer ADDR_LSB = (C_S_AXI_DATA_WIDTH/32)+ 1;
 localparam integer OPT_MEM_ADDR_BITS = 5;
-localparam integer USER_NUM_MEM = 1;
 //----------------------------------------------
 //-- Signals for user logic memory space example
 //------------------------------------------------
-wire [OPT_MEM_ADDR_BITS:0] mem_address;
-wire [USER_NUM_MEM-1:0] mem_select;
-reg [C_S_AXI_DATA_WIDTH-1:0] mem_data_out[0 : USER_NUM_MEM-1];
-
-genvar i;
-genvar j;
-genvar mem_byte_index;
-
+wire block_data_input;
 // I/O Connections assignments
 
 assign S_AXI_AWREADY	= axi_awready;
-assign S_AXI_WREADY	= axi_wready;
+assign S_AXI_WREADY	= axi_wready & (~block_data_input);
 assign S_AXI_BRESP	= axi_bresp;
 assign S_AXI_BUSER	= axi_buser;
 assign S_AXI_BVALID	= axi_bvalid;
@@ -259,7 +251,7 @@ always @( posedge S_AXI_ACLK ) begin
             axi_awv_awr_flag  <= 1'b1;
             // used for generation of bresp() and bvalid
         end
-        else if (S_AXI_WLAST && axi_wready)
+        else if (S_AXI_WLAST && S_AXI_WREADY)
             // preparing to accept next address after current write burst tx completion
         begin
             axi_awv_awr_flag  <= 1'b0;
@@ -290,7 +282,7 @@ always @( posedge S_AXI_ACLK ) begin
             // start address of transfer
             axi_awlen_cntr <= 0;
         end
-        else if((axi_awlen_cntr <= axi_awlen) && axi_wready && S_AXI_WVALID) begin
+        else if((axi_awlen_cntr <= axi_awlen) && S_AXI_WREADY && S_AXI_WVALID) begin
 
             axi_awlen_cntr <= axi_awlen_cntr + 1;
 
@@ -351,7 +343,7 @@ end
 // Implement write response logic generation
 
 // The write response and response valid signals are asserted by the slave
-// when axi_wready, S_AXI_WVALID, axi_wready and S_AXI_WVALID are asserted.
+// when S_AXI_WREADY, S_AXI_WVALID, S_AXI_WREADY and S_AXI_WVALID are asserted.
 // This marks the acceptance of address and indicates the status of
 // write transaction.
 
@@ -362,7 +354,7 @@ always @( posedge S_AXI_ACLK ) begin
         axi_buser <= 0;
     end
     else begin
-        if (axi_awv_awr_flag && axi_wready && S_AXI_WVALID && ~axi_bvalid && S_AXI_WLAST ) begin
+        if (axi_awv_awr_flag && S_AXI_WREADY && S_AXI_WVALID && ~axi_bvalid && S_AXI_WLAST ) begin
             axi_bvalid <= 1'b1;
             axi_bresp  <= 2'b0;
             // 'OKAY' response
@@ -519,11 +511,12 @@ wire hash_busy_o;
 wire irq_finish;
 
 assign rst_n = S_AXI_ARESETN & (~slv_reg0[0]);
-assign reg_write_en = axi_wready && S_AXI_WVALID;
+assign reg_write_en = S_AXI_WREADY && S_AXI_WVALID;
 assign reg_read_en = axi_arv_arr_flag;
 
 // data address from 0x10 ~ 0x1f
 assign dat_addr_vaild = axi_awaddr[ADDR_LSB+OPT_MEM_ADDR_BITS:ADDR_LSB+4] == 2'h1;
+assign block_data_input = hash_busy_o && dat_addr_vaild;
 assign dat_vaild_i = reg_write_en & dat_addr_vaild;
 assign dat_lsb_i = S_AXI_WDATA[31:0];
 assign irq_hash_finish = slv_reg0[1] & irq_finish;

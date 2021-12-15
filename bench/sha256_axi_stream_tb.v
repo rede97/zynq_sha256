@@ -2,12 +2,11 @@
 
 // `include "sha256_v1_0_S00_AXI.v"
 
-module sha256_axi_lite_tb;
+module sha256_axi_stream_tb;
 
-initial
-begin
-    $dumpfile("sha256_axi_lite.vcd");        //生成的vcd文件名称
-    $dumpvars(0, sha256_axi_lite_tb);    //tb模块名称
+initial begin
+    $dumpfile("sha256_axi_stream_tb.vcd");        //生成的vcd文件名称
+    $dumpvars(0, sha256_axi_stream_tb);    //tb模块名称
     $timeformat(-9, 2, "ns", 4);
 end
 
@@ -22,58 +21,73 @@ wire s_axi_aresetn;
 assign s_axi_aclk = aclk;
 assign s_axi_aresetn = aresetn;
 
+// read address
 wire s_axi_arready;
-reg [7:0] s_axi_araddr;
+reg [5:0] s_axi_araddr;
 reg s_axi_arvalid;
 
+// write address
 wire s_axi_awready;
-reg [7:0] s_axi_awaddr;
+reg [5:0] s_axi_awaddr;
 reg s_axi_awvalid;
 
+// write response
 reg s_axi_bready;
 wire [1:0] s_axi_bresp;
 wire s_axi_bvalid;
 
+// read data
 reg s_axi_rready;
 wire [31:0] s_axi_rdata;
 wire [1:0] s_axi_rresp;
 wire s_axi_rvalid;
 
+// write data
 wire s_axi_wready;
 reg [31:0] s_axi_wdata;
 reg [3:0] s_axi_wstrb;
 reg s_axi_wvalid;
 
-wire irq_hash_finish;
+wire axis_tready;
+reg [31:0] axis_tdata;
+reg [3:0] axis_tstrb;
+reg axis_tlast;
+reg axis_tvaild;
 
-
-sha256_axi_v1_0_S00_AXI # (
-                            .C_S_AXI_DATA_WIDTH(32),
-                            .C_S_AXI_ADDR_WIDTH(8)
-                        ) sha256_v1_0_S00_AXI_inst (
-                            .S_AXI_ACLK(s_axi_aclk),
-                            .S_AXI_ARESETN(s_axi_aresetn),
-                            .S_AXI_AWADDR(s_axi_awaddr),
-                            .S_AXI_AWPROT(3'h0),
-                            .S_AXI_AWVALID(s_axi_awvalid),
-                            .S_AXI_AWREADY(s_axi_awready),
-                            .S_AXI_WDATA(s_axi_wdata),
-                            .S_AXI_WSTRB(s_axi_wstrb),
-                            .S_AXI_WVALID(s_axi_wvalid),
-                            .S_AXI_WREADY(s_axi_wready),
-                            .S_AXI_BRESP(s_axi_bresp),
-                            .S_AXI_BVALID(s_axi_bvalid),
-                            .S_AXI_BREADY(s_axi_bready),
-                            .S_AXI_ARADDR(s_axi_araddr),
-                            .S_AXI_ARPROT(3'h0),
-                            .S_AXI_ARVALID(s_axi_arvalid),
-                            .S_AXI_ARREADY(s_axi_arready),
-                            .S_AXI_RDATA(s_axi_rdata),
-                            .S_AXI_RRESP(s_axi_rresp),
-                            .S_AXI_RVALID(s_axi_rvalid),
-                            .S_AXI_RREADY(s_axi_rready),
-                            .irq_hash_finish(irq_hash_finish)
-                        );
+sha256_stream_v1_0 # (
+                       .C_S00_AXI_DATA_WIDTH(32),
+                       .C_S00_AXI_ADDR_WIDTH(6),
+                       .C_S00_AXIS_TDATA_WIDTH(32)
+                   ) sha256_stream_v1_0_inst (
+                       .s00_axi_aclk(s_axi_aclk),
+                       .s00_axi_aresetn(s_axi_aresetn),
+                       .s00_axi_awaddr(s_axi_awaddr),
+                       .s00_axi_awprot(3'h0),
+                       .s00_axi_awvalid(s_axi_awvalid),
+                       .s00_axi_awready(s_axi_awready),
+                       .s00_axi_wdata(s_axi_wdata),
+                       .s00_axi_wstrb(s_axi_wstrb),
+                       .s00_axi_wvalid(s_axi_wvalid),
+                       .s00_axi_wready(s_axi_wready),
+                       .s00_axi_bresp(s_axi_bresp),
+                       .s00_axi_bvalid(s_axi_bvalid),
+                       .s00_axi_bready(s_axi_bready),
+                       .s00_axi_araddr(s_axi_araddr),
+                       .s00_axi_arprot(3'h0),
+                       .s00_axi_arvalid(s_axi_arvalid),
+                       .s00_axi_arready(s_axi_arready),
+                       .s00_axi_rdata(s_axi_rdata),
+                       .s00_axi_rresp(s_axi_rresp),
+                       .s00_axi_rvalid(s_axi_rvalid),
+                       .s00_axi_rready(s_axi_rready),
+                       .s00_axis_aclk(s_axi_aclk),
+                       .s00_axis_aresetn(s_axi_aresetn),
+                       .s00_axis_tready(axis_tready),
+                       .s00_axis_tdata(axis_tdata),
+                       .s00_axis_tstrb(axis_tstrb),
+                       .s00_axis_tlast(axis_tlast),
+                       .s00_axis_tvalid(axis_tvaild)
+                   );
 
 task axil_wait;
     input integer n;
@@ -89,25 +103,21 @@ task axil_read;
     begin
         s_axi_araddr = {addr, 2'b00};
         temp_addr = s_axi_araddr;
-        $display("[%m]#%t INFO: Read Addr: 0x%08x", $time, temp_addr);
+        // $display("[%m]#%t INFO: Read Addr: 0x%08x", $time, temp_addr);
         s_axi_arvalid = 1;
         s_axi_rready = 1;
-        repeat(4)
-        begin
+        repeat(4) begin
             axil_wait(1);
-            if(s_axi_arready)
-            begin
+            if(s_axi_arready) begin
                 s_axi_araddr = 0;
                 s_axi_arvalid = 0;
                 axil_wait(1);
                 s_axi_rready = 0;
-                if(s_axi_rvalid)
-                begin
-                    $display("[%m]#%t INFO: Read Value: 0x%08x @ 0x%08x -> [resp: %d]", $time, s_axi_rdata, temp_addr, s_axi_rresp);
+                if(s_axi_rvalid) begin
+                    // $display("[%m]#%t INFO: Read Value: 0x%08x @ 0x%08x -> [resp: %d]", $time, s_axi_rdata, temp_addr, s_axi_rresp);
                     value = s_axi_rdata;
                 end
-                else
-                begin
+                else begin
                     $display("[%m]#%t ERROR: Read Invaild @ 0x%08x -> [resp: %d]", $time, temp_addr, s_axi_rresp);
                     value = 32'h00000000;
                 end
@@ -140,39 +150,33 @@ task axil_write;
         s_axi_awvalid = 1;
         s_axi_awaddr = {addr, 2'b00};
         temp_addr = s_axi_awaddr;
-        $display("[%m]#%t INFO: Write Data: 0x%08x to 0x%08x", $time, data, temp_addr);
+        // $display("[%m]#%t INFO: Write Data: 0x%08x to 0x%08x", $time, data, temp_addr);
 
         s_axi_wvalid = 1;
         s_axi_wdata = data;
         s_axi_wstrb = 4'b1111;
 
         s_axi_bready = 1;
-        repeat(4)
-        begin
+        repeat(4) begin
             axil_wait(1);
-            if(s_axi_awready)
-            begin
+            if(s_axi_awready) begin
                 awready_ok = 1;
                 s_axi_awvalid = 0;
                 s_axi_awaddr = 0;
             end
-            if(s_axi_wready)
-            begin
+            if(s_axi_wready) begin
                 wready_ok = 1;
                 s_axi_wvalid = 0;
                 s_axi_wdata = 0;
                 s_axi_wstrb = 0;
             end
-            if(wready_ok & awready_ok)
-            begin
+            if(wready_ok & awready_ok) begin
                 axil_wait(1);
                 s_axi_bready = 0;
-                if(s_axi_bvalid)
-                begin
-                    $display("[%m]#%t INFO: Write Data: 0x%08x => 0x%08x -> [resp: %d]", $time, data, temp_addr, s_axi_bresp);
+                if(s_axi_bvalid) begin
+                    // $display("[%m]#%t INFO: Write Data: 0x%08x => 0x%08x -> [resp: %d]", $time, data, temp_addr, s_axi_bresp);
                 end
-                else
-                begin
+                else begin
                     $display("[%m]#%t Error: Write Invaild: 0x%08x to 0x%08x -> [resp: %d]", $time, temp_addr, data, s_axi_bresp);
                 end
 
@@ -181,12 +185,10 @@ task axil_write;
             end
         end
 
-        if(awready_ok)
-        begin
+        if(awready_ok) begin
             $display("[%m]#%t ERROR: Timeout, AWREADY must be 1 @ 0x%08x", $time, temp_addr);
         end
-        if(wready_ok)
-        begin
+        if(wready_ok) begin
             $display("[%m]#%t ERROR: Timeout, WREADY must be 1 @ 0x%08x", $time, temp_addr);
         end
 
@@ -203,15 +205,38 @@ task axil_write;
     end
 endtask
 
-initial
-begin
+reg [31:0]axis_buffer[64:0];
+task axis_write;
+    input[5:0] wlen;
+    integer cnt;
+    begin
+        axis_tvaild = 1'b1;
+        axis_tstrb = 4'b1111;
+        cnt = 0;
+        while (cnt < wlen) begin
+            if(cnt + 1 == wlen) begin
+                axis_tlast = 1'b1;
+            end
+            axis_tdata = axis_buffer[cnt];
+            axil_wait(1);
+            if(axis_tready) begin
+                cnt = cnt + 1;
+            end
+        end
+        axis_tvaild = 0;
+        axis_tstrb = 0;
+        axis_tlast = 0;
+        axis_tdata = 0;
+    end
+endtask
+
+initial begin
     #0 aclk = 0;
     forever
         #(T/2) aclk = ~aclk;
 end
 
-initial
-begin
+initial begin
     s_axi_araddr = 0;
     s_axi_arvalid = 0;
 
@@ -225,6 +250,11 @@ begin
     s_axi_wdata = 0;
     s_axi_wstrb = 0;
     s_axi_wvalid = 0;
+
+    axis_tdata = 0;
+    axis_tlast = 0;
+    axis_tvaild = 0;
+    axis_tstrb = 0;
 
     #0 aresetn = 0;
     axil_wait(3);
@@ -246,50 +276,47 @@ task dump_sha256_result;
     end
 endtask
 
-reg[31:0] temp;
-initial
-begin
+initial begin
     @(posedge aresetn);
     axil_wait(3);
     axil_write(32'h00, 32'b11);
 
-    axil_write(32'h10, 32'h64343962);
-    axil_write(32'h10, 32'h39623732);
-    axil_write(32'h10, 32'h64343339);
-    axil_write(32'h10, 32'h38306533);
-    axil_write(32'h10, 32'h65323561);
-    axil_write(32'h10, 32'h37643235);
-    axil_write(32'h10, 32'h64376164);
-    axil_write(32'h10, 32'h61666261);
-    axil_write(32'h10, 32'h34383463);
-    axil_write(32'h10, 32'h33656665);
-    axil_write(32'h10, 32'h33356137);
-    axil_write(32'h10, 32'h65653038);
-    axil_write(32'h10, 32'h38383039);
-    axil_write(32'h10, 32'h63613766);
-    axil_write(32'h10, 32'h66653265);
-    axil_write(32'h10, 32'h39656463);
+    axis_buffer[0] = 32'h64343962;
+    axis_buffer[1] = 32'h39623732;
+    axis_buffer[2] = 32'h64343339;
+    axis_buffer[3] = 32'h38306533;
+    axis_buffer[4] = 32'h65323561;
+    axis_buffer[5] = 32'h37643235;
+    axis_buffer[6] = 32'h64376164;
+    axis_buffer[7] = 32'h61666261;
+    axis_buffer[8] = 32'h34383463;
+    axis_buffer[9] = 32'h33656665;
+    axis_buffer[10] = 32'h33356137;
+    axis_buffer[11] = 32'h65653038;
+    axis_buffer[12] = 32'h38383039;
+    axis_buffer[13] = 32'h63613766;
+    axis_buffer[14] = 32'h66653265;
+    axis_buffer[15] = 32'h39656463;
+    axis_buffer[16] = 32'h00000080;
+    axis_buffer[17] = 32'h00000000;
+    axis_buffer[18] = 32'h00000000;
+    axis_buffer[19] = 32'h00000000;
+    axis_buffer[20] = 32'h00000000;
+    axis_buffer[21] = 32'h00000000;
+    axis_buffer[22] = 32'h00000000;
+    axis_buffer[23] = 32'h00000000;
+    axis_buffer[24] = 32'h00000000;
+    axis_buffer[25] = 32'h00000000;
+    axis_buffer[26] = 32'h00000000;
+    axis_buffer[27] = 32'h00000000;
+    axis_buffer[28] = 32'h00000000;
+    axis_buffer[29] = 32'h00000000;
+    axis_buffer[30] = 32'h00000000;
+    axis_buffer[31] = 32'h00020000;
+    axis_write(32);
 
-    @(posedge irq_hash_finish);
-    axil_write(32'h10, 32'h00000080);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00000000);
-    axil_write(32'h10, 32'h00020000);
-    @(posedge irq_hash_finish);
 
-    axil_wait(4);
+    axil_wait(70);
     axil_read(32'h08, sha256_result[0]);
     axil_read(32'h09, sha256_result[1]);
     axil_read(32'h0a, sha256_result[2]);
