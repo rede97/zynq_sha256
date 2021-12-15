@@ -258,7 +258,9 @@ always @( posedge S_AXI_ACLK ) begin
                 end
             endcase
         end
-        slv_reg0 <= slv_reg0_nxt;
+        else begin
+            slv_reg0 <= slv_reg0_nxt;
+        end
     end
 end
 
