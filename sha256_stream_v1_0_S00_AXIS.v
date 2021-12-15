@@ -38,7 +38,7 @@ module sha256_stream_v1_0_S00_AXIS #
        );
 // I/O Connections assignments
 assign S_AXIS_TREADY = !device_busy;
-assign data_vaild = S_AXIS_TVALID && S_AXIS_TREADY;
+assign data_vaild = S_AXIS_TVALID;
 assign data_out = S_AXIS_TDATA;
 
 // Add user logic here
