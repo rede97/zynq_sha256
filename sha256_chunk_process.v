@@ -26,7 +26,8 @@ module sha256_chunk_process(
            input process_start,
            input dat_vaild_i,
            input[31:0] dat_msb_i,
-           output[31:0] w_out
+           output[31:0] w_out,
+           output w_out_vaild
        );
 
 reg[31:0] W[15:0];
@@ -53,6 +54,7 @@ wire[31:0] w_m16;
 wire[31:0] w_m7;
 
 assign pipeline_start = dat_vaild_i | process_start;
+assign w_out_vaild = pipeline_start;
 
 assign w_m16 = W[0];
 
@@ -93,7 +95,7 @@ end
 assign w_new = (w_m16 + s0) + (w_m7 + s1);
 
 assign w_in = process_start ? w_new : dat_msb_i;
-assign w_out = W[0];
+assign w_out = w_in;
 
 assign W_next[15] = pipeline_start ? w_in : W[15];
 always@(posedge clk or negedge rst_n) begin

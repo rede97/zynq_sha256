@@ -55,22 +55,27 @@ wire[31:0] dat_msb_i;
 wire[5:0] k_addr;
 wire[31:0] k_out;
 wire[31:0] w_out;
+wire w_out_vaild;
 wire next_state_is_idle;
 wire next_state_is_proc;
 wire next_state_is_finish;
+wire state_is_load;
 wire state_is_proc;
 wire state_is_finish;
+wire compress_start;
 
-assign k_addr = counter[5:0] - 6'h10;
+assign k_addr = counter[5:0];
 assign next_state_is_idle = state_next == IDLE;
 assign next_state_is_proc = state_next == PROC;
 assign next_state_is_finish = state_next == FINISH;
+assign state_is_load = state == LOAD;
 assign state_is_proc = state == PROC;
 assign state_is_finish = state == FINISH;
 
+assign compress_start = state_is_load | state_is_proc;
 assign hash_busy_o = next_state_is_proc | state_is_proc | state_is_finish;
 assign dat_msb_i = {dat_lsb_i[7:0], dat_lsb_i[15:8], dat_lsb_i[23:16], dat_lsb_i[31:24]};
-assign counter_nxt = next_state_is_idle ? 8'h0: dat_vaild_i | next_state_is_proc ? counter + 8'h1 : counter;
+assign counter_nxt = next_state_is_idle ? 8'h0 : w_out_vaild ? counter + 8'h1 : counter;
 
 always@(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
@@ -87,7 +92,8 @@ sha256_chunk_process sha256_chunk_process_u0(
                          .process_start(next_state_is_proc),
                          .dat_vaild_i(dat_vaild_i),
                          .dat_msb_i(dat_msb_i),
-                         .w_out(w_out)
+                         .w_out(w_out),
+                         .w_out_vaild(w_out_vaild)
                      );
 
 sha256_k sha256_k_u1(
@@ -99,7 +105,8 @@ sha256_k sha256_k_u1(
 sha256_chunk_compress sha256_chunk_compress_u2(
                           .clk(clk),
                           .rst_n(rst_n),
-                          .compress_start(state_is_proc),
+                          .in_vaild(w_out_vaild),
+                          .compress_start(compress_start),
                           .update_hash(next_state_is_finish),
                           .w_in(w_out),
                           .k_in(k_out),
@@ -148,7 +155,7 @@ always@(*) begin
                 end
             end
             PROC: begin
-                if(counter == 8'h50) begin
+                if(counter == 8'h40) begin
                     state_next <= FINISH;
                 end
                 else begin
