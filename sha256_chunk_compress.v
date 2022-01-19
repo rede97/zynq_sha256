@@ -25,6 +25,7 @@ module sha256_chunk_compress(
            input rst_n,
            input compress_start,
            input update_hash,
+           input in_vaild,
            input[31:0] w_in,
            input[31:0] k_in,
            output[31:0] hash0,
@@ -126,9 +127,17 @@ always@(posedge clk or negedge rst_n) begin
         stage[2] <= 32'h0;
     end
     else begin
-        stage[0] <= s0 + maj;
-        stage[1] <= s1 + ch;
-        stage[2] <= w_in + k_in + h;
+        if(in_vaild) begin
+            // preload 'compress' signal
+            stage[0] <= s0 + maj;
+            stage[1] <= s1 + ch;
+            stage[2] <= w_in + k_in + h;
+        end
+        else begin
+            stage[0] <= stage[0];
+            stage[1] <= stage[1];
+            stage[2] <= stage[2];
+        end
     end
 end
 
@@ -139,7 +148,12 @@ generate genvar i;
                 abcdefgh[i] <= 32'h0;
             end
             else begin
-                abcdefgh[i] <= abcdefgh_next[i];
+                if(in_vaild) begin
+                    abcdefgh[i] <= abcdefgh_next[i];
+                end
+                else begin
+                    abcdefgh[i] <= abcdefgh[i];
+                end
             end
         end
         assign h8_next[i] = update_hash ? H8[i] + abcdefgh_next[i] : H8[i];

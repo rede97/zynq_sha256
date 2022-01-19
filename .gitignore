@@ -5,6 +5,7 @@ component.xml
 .vscode/
 test/
 work/
-sim/log/
+bench/sim/log/
 modelsim.ini
 *.gtkw
+*.vcd
