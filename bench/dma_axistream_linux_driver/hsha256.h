@@ -68,7 +68,7 @@ typedef struct
 #define SHA256_STATUS_RESET 0x00000001
 #define SHA256_STATUS_BUSY 0x00000100
 
-#define SHA256_IS_BUSY(u) (ioread32(&((u)->status)) & SHA256_STATUS_BUSY)
+#define SHA256_IS_BUSY(u) ((u)->status & SHA256_STATUS_BUSY)
 
 struct sha256_driver_data
 {
@@ -76,9 +76,8 @@ struct sha256_driver_data
     struct class *cls;
     struct device *device;
     struct dma_chan *chan;
-    void *tx_buf[2];
-    dma_addr_t tx_addr[2];
-    int tx_buf_sel;
+    void *tx_buf;
+    dma_addr_t tx_addr;
     char dev_name[24];
     int inited;
     int busy;

@@ -1,8 +1,15 @@
 #include "hsha256.h"
 
+// static irqreturn_t irq_interrupt(int irq, void *dev_id)
+// {
+//     struct sha256_driver_data *drv_data = dev_id;
+//     wake_up_interruptible(&drv_data->r_wqh);
+//     wake_up_interruptible(&drv_data->w_wqh);
+//     return IRQ_HANDLED;
+// }
+
 static int sha256_open(struct inode *inode, struct file *filp)
 {
-    int i;
     struct sha256_driver_data *drv_data = container_of(inode->i_cdev, struct sha256_driver_data, cdev);
     if (drv_data->inited)
     {
@@ -12,31 +19,10 @@ static int sha256_open(struct inode *inode, struct file *filp)
 
     init_waitqueue_head(&drv_data->r_wqh);
     init_waitqueue_head(&drv_data->w_wqh);
-    for (i = 0; i < 2; i++)
-    {
-        drv_data->tx_buf[i] = dma_alloc_coherent(drv_data->chan->device->dev, DMA_BUF_SIZE, &drv_data->tx_addr[i], GFP_KERNEL);
-        if (!drv_data->tx_buf[i])
-        {
-            sha256log(KERN_ALERT, "dma alloc coherent failed\n");
-            for (i = 0; i < 2; i++)
-            {
-                if (drv_data->tx_buf[i])
-                {
-                    dma_free_coherent(drv_data->chan->device->dev, DMA_BUF_SIZE, drv_data->tx_buf[i], drv_data->tx_addr[i]);
-                }
-            }
-            return -ENOMEM;
-        }
-    }
+    drv_data->tx_buf = dma_alloc_coherent(drv_data->chan->device->dev, DMA_BUF_SIZE, &drv_data->tx_addr, GFP_KERNEL);
 
     iowrite32(SHA256_STATUS_RESET, &drv_data->unit->status); // reset
-    while (SHA256_IS_BUSY(drv_data->unit))
-    {
-    }
-
     drv_data->writen = 0;
-    drv_data->busy = 0;
-    drv_data->tx_buf_sel = 0;
     drv_data->inited = 1;
     sha256log(KERN_INFO, "open %s\n", drv_data->dev_name);
     return 0;
@@ -44,17 +30,10 @@ static int sha256_open(struct inode *inode, struct file *filp)
 
 static int sha256_release(struct inode *inode, struct file *filp)
 {
-    int i;
     struct sha256_driver_data *drv_data = container_of(inode->i_cdev, struct sha256_driver_data, cdev);
-    for (i = 0; i < 2; i++)
-    {
-        if (drv_data->tx_buf[i])
-        {
-            dma_free_coherent(drv_data->chan->device->dev, DMA_BUF_SIZE, drv_data->tx_buf[i], drv_data->tx_addr[i]);
-        }
-    }
+    dma_free_coherent(drv_data->chan->device->dev, DMA_BUF_SIZE, drv_data->tx_buf, drv_data->tx_addr);
     drv_data->inited = 0;
-    sha256log(KERN_INFO, "release %s writen: 0x%x\n", drv_data->dev_name, drv_data->writen);
+    sha256log(KERN_INFO, "release %s\n", drv_data->dev_name);
     return 0;
 }
 
@@ -130,6 +109,7 @@ static void dma_callback(void *data)
     wake_up_interruptible(&drv_data->w_wqh);
     drv_data->chan->device->device_terminate_all(drv_data->chan);
     drv_data->busy = 0;
+    // sha256log(KERN_INFO, "dma interrupt\n");
 }
 
 static ssize_t sha256_write(struct file *filp, const char __user *buf, size_t count, loff_t *pos)
@@ -144,25 +124,31 @@ static ssize_t sha256_write(struct file *filp, const char __user *buf, size_t co
     // sha256log(KERN_WARNING, "block mode\n");
     while (copied < count)
     {
-        int buf_sel = drv_data->tx_buf_sel;
-        drv_data->tx_buf_sel = !drv_data->tx_buf_sel;
         should_copy = min((size_t)DMA_BUF_SIZE, count - copied);
-        if (copy_from_user(drv_data->tx_buf[buf_sel], &buf[copied], should_copy))
+        if (copy_from_user(drv_data->tx_buf, &buf[copied], should_copy))
         {
             sha256log(KERN_ALERT, "copy error\n");
             goto write_err;
         }
+        // if (memcmp(drv_data->tx_buf, &buf[copied], should_copy))
+        // {
+        //     sha256log(KERN_ALERT, "no equal");
+        // }
+        // sha256log(KERN_INFO, "copy size: %dKiB to dma addr: %p\n", should_copy / 1024, (void *)drv_data->tx_addr);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_dma_memcpy);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_dma_xor);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_dma_xor_val);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_dma_pq);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_dma_pq_val);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_dma_memset_sg);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_dma_interrupt);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_slave_sg);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_dma_cyclic);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_interleaved_dma);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_prep_dma_imm_data);
+        // sha256log(KERN_INFO, "%p\n", drv_data->chan->device->device_terminate_all);
 
-        if (drv_data->busy)
-        {
-            if (wait_event_interruptible(drv_data->w_wqh, !drv_data->busy))
-            {
-                sha256log(KERN_ALERT, "write error\n");
-                goto write_err;
-            }
-        }
-
-        desc = drv_data->chan->device->device_prep_dma_cyclic(drv_data->chan, drv_data->tx_addr[buf_sel], should_copy, should_copy, DMA_MEM_TO_DEV, DMA_CTRL_ACK | DMA_PREP_INTERRUPT);
+        desc = drv_data->chan->device->device_prep_dma_cyclic(drv_data->chan, drv_data->tx_addr, should_copy, should_copy, DMA_MEM_TO_DEV, DMA_CTRL_ACK | DMA_PREP_INTERRUPT);
         if (!desc)
         {
             sha256log(KERN_ALERT, "dma memcpy error\n");
@@ -171,21 +157,17 @@ static ssize_t sha256_write(struct file *filp, const char __user *buf, size_t co
         // sha256log(KERN_ALERT, "dma set callback\n");
         desc->callback = dma_callback;
         desc->callback_param = drv_data;
-        drv_data->busy = 1;
         // sha256log(KERN_ALERT, "dma submit\n");
         dmaengine_submit(desc);
         // sha256log(KERN_ALERT, "dma pending\n");
         dma_async_issue_pending(drv_data->chan);
-        copied += should_copy;
-    }
-
-    if (drv_data->busy)
-    {
+        drv_data->busy = 1;
         if (wait_event_interruptible(drv_data->w_wqh, !drv_data->busy))
         {
             sha256log(KERN_ALERT, "write error\n");
             goto write_err;
         }
+        copied += should_copy;
     }
 write_err:
     // sha256log(KERN_INFO, "write: %d copied: %d status: 0x%x ret: %d\n", count, copied, drv_data->unit->status, ret);

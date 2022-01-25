@@ -31,7 +31,6 @@ static int sha256_probe(struct platform_device *pdev)
     platform_set_drvdata(pdev, drv_data);
     drv_data->inited = 0;
     sprintf(drv_data->dev_name, SHA256_DEV_NAME "@%08x", res->start);
-    sha256log(KERN_INFO, "dev name: %s\n", drv_data->dev_name);
     
     chan = dma_request_chan(&pdev->dev, "tx");
     if (!chan)
