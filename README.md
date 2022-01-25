@@ -6,16 +6,16 @@ IP Core of SHA256 algorithm, support AXI4-Lite, AXI4-Full, AXI4-Stream interface
 
 ## FOR ZYNQ
 ### Block diagram
-![zynq](bench\zynq_linux_driver\zynq_sha256_block.png)
+![zynq](bench/zynq_linux_driver/zynq_sha256_block.png)
 
 ### Test
-![bench](bench\zynq_linux_driver\bench.png)
+![bench](bench/zynq_linux_driver/bench.png)
 
 ## FOR KINTEX WITH PCIE
 
 ### Block diagram
-![pcie](bench\pcie_linux_driver\pcie_sha256_block.png)
+![pcie](bench/pcie_linux_driver/pcie_sha256_block.png)
 
 ### Test (platform: intel 10400, **page aligned memory required!**)
-![bench](bench\pcie_linux_driver\bench.png)
+![bench](bench/pcie_linux_driver/bench.png)
 
