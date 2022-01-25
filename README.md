@@ -16,6 +16,6 @@ IP Core of SHA256 algorithm, support AXI4-Lite, AXI4-Full, AXI4-Stream interface
 ### Block diagram
 ![pcie](bench/pcie_linux_driver/pcie_sha256_block.png)
 
-### Test (platform: intel 10400, **page aligned memory required!**)
+### Test (platform: intel i5-10400, **page aligned memory required!**)
 ![bench](bench/pcie_linux_driver/bench.png)
 
